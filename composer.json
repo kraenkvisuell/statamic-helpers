@@ -1,0 +1,29 @@
+{
+    "name": "kraenkvisuell/statamic-transfer-content",
+    "autoload": {
+        "psr-4": {
+            "Kraenkvisuell\\StatamicTransferContent\\": "src"
+        }
+    },
+    "extra": {
+        "statamic": {
+            "name": "Transfer Content",
+            "description": "Statamic Transfer Content addon"
+        },
+        "laravel": {
+            "providers": [
+                "Kraenkvisuell\\StatamicTransferContent\\ServiceProvider"
+            ]
+        }
+    },
+    "require-dev": {
+        "laravel/pint": "^1.1",
+        "orchestra/testbench": "^7.6",
+        "statamic/cms": "^3.3"
+    },
+    "config": {
+        "allow-plugins": {
+            "pixelfear/composer-dist-plugin": true
+        }
+    }
+}
