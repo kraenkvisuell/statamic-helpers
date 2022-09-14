@@ -1,29 +1,31 @@
 {
-    "name": "kraenkvisuell/statamic-transfer-content",
+    "name": "kraenkvisuell/statamic-helpers",
     "autoload": {
         "psr-4": {
-            "Kraenkvisuell\\StatamicTransferContent\\": "src"
+            "Kraenkvisuell\\StatamicHelpers\\": "src"
         }
     },
     "extra": {
         "statamic": {
-            "name": "Transfer Content",
-            "description": "Statamic Transfer Content addon"
+            "name": "Helpers",
+            "description": "Statamic Helpers addon"
         },
         "laravel": {
             "providers": [
-                "Kraenkvisuell\\StatamicTransferContent\\ServiceProvider"
+                "Kraenkvisuell\\StatamicHelpers\\HelperServiceProvider"
             ]
         }
     },
     "require-dev": {
         "laravel/pint": "^1.1",
-        "orchestra/testbench": "^7.6",
-        "statamic/cms": "^3.3"
+        "orchestra/testbench": "^7.6"
     },
     "config": {
         "allow-plugins": {
             "pixelfear/composer-dist-plugin": true
         }
+    },
+    "require": {
+        "statamic/cms": "^3.3"
     }
 }
