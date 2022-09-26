@@ -8,7 +8,7 @@ class HelperServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        require_once __DIR__.'/../helpers/helpers.php';
+        //
     }
 
     public function register()
