@@ -34,7 +34,6 @@ class UploadGlobals extends Command
         $this->comment('Dateien uploaden...');
 
         if ($mode == 'clear') {
-            ray('ssh '.$user.'@'.$host.' rm -rf /'.$sshPath.'/'.$globalsPath.'/*.yaml');
             exec(
                 'ssh '.$user.'@'.$host.' rm -rf /'.$sshPath.'/'.$globalsPath.'/*.yaml'
             );

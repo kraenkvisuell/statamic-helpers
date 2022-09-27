@@ -3,11 +3,12 @@
 namespace Kraenkvisuell\StatamicHelpers\Console;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
 
 class UploadAssets extends Command
 {
-    public $signature = 'statamic-helpers:upload-assets {--P|production} {--C|clear}';
+    public $signature = 'statamic-helpers:upload-assets 
+        {--P|production} 
+        {--C|clear}';
 
     public function handle()
     {
@@ -23,22 +24,31 @@ class UploadAssets extends Command
 
         $user = config('statamic-helpers.remote.'.$env.'.ssh_user');
         $host = config('statamic-helpers.remote.'.$env.'.ssh_host');
-        $path = config('statamic-helpers.remote.'.$env.'.ssh_path');
+        $sshPath = config('statamic-helpers.remote.'.$env.'.ssh_path');
+        $assetsPath = config('statamic-helpers.remote.'.$env.'.assets_path');
 
         $localPath = base_path(config('statamic-helpers.local.assets_path'));
-        $remotePath = Str::beforeLast(config('statamic-helpers.remote.'.$env.'.assets_path'), '/');
+        if (! $localPath) {
+            return;
+        }
 
-        $remoteString = $user.'@'.$host.':'.$path;
+        $remoteString = $user.'@'.$host.':'.'/'.$sshPath;
 
         $this->comment('verbinden...');
 
         $this->comment('Medien hochladen...');
 
-        // exec(
-        //     'scp -r '
-        //     .$localPath.' '
-        //     .$remoteString.'/'.$remotePath
-        // );
+        if ($mode == 'clear') {
+            exec(
+                'ssh '.$user.'@'.$host.' rm -rf /'.$sshPath.'/'.$assetsPath.'/*'
+            );
+        }
+
+        exec(
+            'scp -r '
+            .$localPath.'/* '
+            .$remoteString.'/'.$assetsPath
+        );
 
         $this->info('Medien-Upload auf '.strtoupper($env).' beendet');
     }
