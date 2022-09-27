@@ -7,14 +7,14 @@ use Illuminate\Support\Str;
 
 class UploadAssets extends Command
 {
-    public $signature = 'statamic-helpers:upload-assets {--P|production} {--R|replace}';
+    public $signature = 'statamic-helpers:upload-assets {--P|production} {--C|clear}';
 
     public function handle()
     {
         $env = $this->option('production') ? 'production' : 'staging';
-        $mode = $this->option('replace') ? 'replace' : 'add';
+        $mode = $this->option('clear') ? 'clear' : 'add';
 
-        $message = $mode == 'replace' ? 'ACHTUNG! Alle bestehenden '.strtoupper($env).'-Medien werden vorher gelöscht!'
+        $message = $mode == 'clear' ? 'ACHTUNG! Alle bestehenden '.strtoupper($env).'-Medien werden vorher gelöscht!'
                                       : 'ACHTUNG! Es werden Medien zu '.strtoupper($env).' hinzugefügt!';
 
         if (! $this->confirm($message.' Wirklich weitermachen? [y|N]')) {

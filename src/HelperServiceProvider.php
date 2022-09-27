@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Kraenkvisuell\StatamicHelpers\Console\DownloadAssets;
 use Kraenkvisuell\StatamicHelpers\Console\DownloadCollections;
 use Kraenkvisuell\StatamicHelpers\Console\UploadAssets;
+use Kraenkvisuell\StatamicHelpers\Console\UploadCollections;
+use Kraenkvisuell\StatamicHelpers\Console\UploadGlobals;
 
 class HelperServiceProvider extends ServiceProvider
 {
@@ -20,6 +22,8 @@ class HelperServiceProvider extends ServiceProvider
                 DownloadAssets::class,
                 DownloadCollections::class,
                 UploadAssets::class,
+                UploadCollections::class,
+                UploadGlobals::class,
             ]);
         }
     }
