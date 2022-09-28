@@ -8,6 +8,7 @@ use Kraenkvisuell\StatamicHelpers\Console\DownloadCollections;
 use Kraenkvisuell\StatamicHelpers\Console\UploadAssets;
 use Kraenkvisuell\StatamicHelpers\Console\UploadCollections;
 use Kraenkvisuell\StatamicHelpers\Console\UploadGlobals;
+use Kraenkvisuell\StatamicHelpers\Console\UploadTrees;
 
 class HelperServiceProvider extends ServiceProvider
 {
@@ -24,6 +25,7 @@ class HelperServiceProvider extends ServiceProvider
                 UploadAssets::class,
                 UploadCollections::class,
                 UploadGlobals::class,
+                UploadTrees::class,
             ]);
         }
     }

@@ -4,9 +4,9 @@ namespace Kraenkvisuell\StatamicHelpers\Console;
 
 use Illuminate\Console\Command;
 
-class UploadGlobals extends Command
+class UploadTrees extends Command
 {
-    public $signature = 'statamic-helpers:upload-globals 
+    public $signature = 'statamic-helpers:upload-trees 
         {--P|production} 
         {--C|clear}';
 
@@ -25,26 +25,30 @@ class UploadGlobals extends Command
         $user = config('statamic-helpers.remote.'.$env.'.ssh_user');
         $host = config('statamic-helpers.remote.'.$env.'.ssh_host');
         $sshPath = config('statamic-helpers.remote.'.$env.'.ssh_path');
-        $globalsPath = 'content/globals';
-        $localPath = base_path($globalsPath);
+        $treesPath = 'content/trees';
+        $localPath = base_path($treesPath);
 
         $remoteString = $user.'@'.$host.':'.'/'.$sshPath;
 
         $this->comment('verbinden...');
         $this->comment('Dateien uploaden...');
 
-        if ($mode == 'clear') {
+        foreach (['collections', 'navigation'] as $subPath) {
+            $this->comment($subPath.' uploaden...');
+
+            if ($mode == 'clear') {
+                exec(
+                    'ssh '.$user.'@'.$host.' rm -rf /'.$sshPath.'/'.$treesPath.'/'.$subPath
+                );
+            }
+
             exec(
-                'ssh '.$user.'@'.$host.' rm -rf /'.$sshPath.'/'.$globalsPath.'/*.yaml'
+                'scp -r '
+                .$localPath.'/'.$subPath.' '
+                .$remoteString.'/'.$treesPath
             );
         }
 
-        exec(
-            'scp -r '
-            .$localPath.'/*.yaml '
-            .$remoteString.'/'.$globalsPath
-        );
-
-        $this->info('Globals-Upload von '.strtoupper($env).' beendet');
+        $this->info('Trees-Upload von '.strtoupper($env).' beendet');
     }
 }
