@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 
 class UploadAssets extends Command
 {
-    public $signature = 'statamic-helpers:upload-assets 
+    public $signature = 'kv:upload-assets 
         {--P|production} 
         {--C|clear}';
 

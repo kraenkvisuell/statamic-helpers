@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 
 class DownloadAssets extends Command
 {
-    public $signature = 'statamic-helpers:download-assets {--P|production} {--C|clear}';
+    public $signature = 'kv:download-assets {--P|production} {--C|clear}';
 
     public function handle()
     {

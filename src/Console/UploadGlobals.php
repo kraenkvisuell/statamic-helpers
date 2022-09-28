@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 
 class UploadGlobals extends Command
 {
-    public $signature = 'statamic-helpers:upload-globals 
+    public $signature = 'kv:upload-globals 
         {--P|production} 
         {--C|clear}';
 

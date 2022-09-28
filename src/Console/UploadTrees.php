@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 
 class UploadTrees extends Command
 {
-    public $signature = 'statamic-helpers:upload-trees 
+    public $signature = 'kv:upload-trees 
         {--P|production} 
         {--C|clear}';
 
