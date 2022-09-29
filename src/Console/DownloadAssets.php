@@ -14,7 +14,7 @@ class DownloadAssets extends Command
         $mode = $this->option('clear') ? 'clear' : 'add';
 
         $message = $mode == 'clear' ? 'ACHTUNG! Alle bestehenden lokalen Medien werden vorher gelöscht!'
-                                      : 'ACHTUNG! Es werden Medien zu den lokalen hinzugefügt!';
+                                    : 'ACHTUNG! Es werden Medien zu den lokalen hinzugefügt!';
 
         if (! $this->confirm($message.' Wirklich weitermachen? [y|N]')) {
             return $this->info('Vorgang abgebrochen.');
