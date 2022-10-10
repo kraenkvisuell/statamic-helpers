@@ -8,7 +8,8 @@ class UploadTrees extends Command
 {
     public $signature = 'kv:upload-trees 
         {--P|production} 
-        {--C|clear}';
+        {--C|clear} 
+        {--F|force}';
 
     public function handle()
     {
@@ -18,7 +19,7 @@ class UploadTrees extends Command
         $message = $mode == 'clear' ? 'ACHTUNG! Alle bestehenden '.strtoupper($env).'-Dateien werden vorher gelöscht!'
                                       : 'ACHTUNG! Es werden Dateien zu '.strtoupper($env).' hinzugefügt!';
 
-        if (! $this->confirm($message.' Wirklich weitermachen? [y|N]')) {
+        if (! $this->option('force') && ! $this->confirm($message.' Wirklich weitermachen? [y|N]')) {
             return $this->info('Vorgang abgebrochen.');
         }
 

@@ -9,7 +9,8 @@ class UploadCollections extends Command
     public $signature = 'kv:upload-collections 
         {collections*} 
         {--P|production} 
-        {--C|clear}';
+        {--C|clear} 
+        {--F|force}';
 
     public function handle()
     {
@@ -20,7 +21,7 @@ class UploadCollections extends Command
         $message = $mode == 'clear' ? 'ACHTUNG! Alle bestehenden '.strtoupper($env).'-Dateien werden vorher gelöscht!'
                                       : 'ACHTUNG! Es werden Dateien zu '.strtoupper($env).' hinzugefügt!';
 
-        if (! $this->confirm($message.' Wirklich weitermachen? [y|N]')) {
+        if (! $this->option('force') && ! $this->confirm($message.' Wirklich weitermachen? [y|N]')) {
             return $this->info('Vorgang abgebrochen.');
         }
 

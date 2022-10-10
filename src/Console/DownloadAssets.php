@@ -6,7 +6,10 @@ use Illuminate\Console\Command;
 
 class DownloadAssets extends Command
 {
-    public $signature = 'kv:download-assets {--P|production} {--C|clear}';
+    public $signature = 'kv:download-assets 
+        {--P|production} 
+        {--C|clear} 
+        {--F|force}';
 
     public function handle()
     {
@@ -16,7 +19,7 @@ class DownloadAssets extends Command
         $message = $mode == 'clear' ? 'ACHTUNG! Alle bestehenden lokalen Medien werden vorher gelöscht!'
                                       : 'ACHTUNG! Es werden Medien zu den lokalen hinzugefügt!';
 
-        if (! $this->confirm($message.' Wirklich weitermachen? [y|N]')) {
+        if (! $this->option('force') && ! $this->confirm($message.' Wirklich weitermachen? [y|N]')) {
             return $this->info('Vorgang abgebrochen.');
         }
 

@@ -8,7 +8,8 @@ class DownloadGlobals extends Command
 {
     public $signature = 'kv:download-globals 
         {--P|production} 
-        {--C|clear}';
+        {--C|clear}
+        {--F|force}';
 
     public function handle()
     {
@@ -18,7 +19,7 @@ class DownloadGlobals extends Command
         $message = $mode == 'clear' ? 'ACHTUNG! Alle bestehenden lokalen Dateien werden vorher gelöscht!'
                                       : 'ACHTUNG! Es werden Dateien zu den lokalen hinzugefügt!';
 
-        if (! $this->confirm($message.' Wirklich weitermachen? [y|N]')) {
+        if (! $this->option('force') && ! $this->confirm($message.' Wirklich weitermachen? [y|N]')) {
             return $this->info('Vorgang abgebrochen.');
         }
 

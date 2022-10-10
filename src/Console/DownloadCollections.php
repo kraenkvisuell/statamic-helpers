@@ -3,13 +3,16 @@
 namespace Kraenkvisuell\StatamicHelpers\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class DownloadCollections extends Command
 {
     public $signature = 'kv:download-collections 
-        {collections*} 
+        {collections?*} 
         {--P|production} 
-        {--C|clear}';
+        {--C|clear} 
+        {--F|force}';
 
     public function handle()
     {
@@ -17,18 +20,28 @@ class DownloadCollections extends Command
         $mode = $this->option('clear') ? 'clear' : 'add';
         $collections = $this->argument('collections');
 
+        $collectionsPath = 'content/collections';
+        $localPath = base_path($collectionsPath);
+
+        if (! count($collections)) {
+            foreach (File::files($localPath) as $file) {
+                if ($file->getExtension() == 'yaml') {
+                    ray($file);
+                    $collections[] = Str::before($file->getFilename(), '.');
+                }
+            }
+        }
+
         $message = $mode == 'clear' ? 'ACHTUNG! Alle bestehenden lokalen Dateien werden vorher gelöscht!'
                                       : 'ACHTUNG! Es werden Dateien zu den lokalen hinzugefügt!';
 
-        if (! $this->confirm($message.' Wirklich weitermachen? [y|N]')) {
+        if (! $this->option('force') && ! $this->confirm($message.' Wirklich weitermachen? [y|N]')) {
             return $this->info('Vorgang abgebrochen.');
         }
 
         $user = config('statamic-helpers.remote.'.$env.'.ssh_user');
         $host = config('statamic-helpers.remote.'.$env.'.ssh_host');
         $sshPath = config('statamic-helpers.remote.'.$env.'.ssh_path');
-        $collectionsPath = 'content/collections';
-        $localPath = base_path($collectionsPath);
 
         $remoteString = $user.'@'.$host.':'.'/'.$sshPath;
 
