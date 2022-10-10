@@ -3,11 +3,13 @@
 namespace Kraenkvisuell\StatamicHelpers\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class UploadCollections extends Command
 {
     public $signature = 'kv:upload-collections 
-        {collections*} 
+        {collections?*} 
         {--P|production} 
         {--C|clear} 
         {--F|force}';
@@ -17,6 +19,18 @@ class UploadCollections extends Command
         $env = $this->option('production') ? 'production' : 'staging';
         $mode = $this->option('clear') ? 'clear' : 'add';
         $collections = $this->argument('collections');
+
+        $collectionsPath = 'content/collections';
+        $localPath = base_path($collectionsPath);
+
+        if (! count($collections)) {
+            foreach (File::files($localPath) as $file) {
+                if ($file->getExtension() == 'yaml') {
+                    ray($file);
+                    $collections[] = Str::before($file->getFilename(), '.');
+                }
+            }
+        }
 
         $message = $mode == 'clear' ? 'ACHTUNG! Alle bestehenden '.strtoupper($env).'-Dateien werden vorher gelöscht!'
                                       : 'ACHTUNG! Es werden Dateien zu '.strtoupper($env).' hinzugefügt!';
@@ -28,9 +42,6 @@ class UploadCollections extends Command
         $user = config('statamic-helpers.remote.'.$env.'.ssh_user');
         $host = config('statamic-helpers.remote.'.$env.'.ssh_host');
         $sshPath = config('statamic-helpers.remote.'.$env.'.ssh_path');
-        $collectionsPath = 'content/collections';
-        $localPath = base_path($collectionsPath);
-
         $remoteString = $user.'@'.$host.':'.'/'.$sshPath;
 
         $this->comment('verbinden...');
