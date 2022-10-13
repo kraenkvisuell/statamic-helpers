@@ -4,6 +4,7 @@ namespace Kraenkvisuell\StatamicHelpers;
 
 use Statamic\Facades\Entry;
 use Statamic\Facades\Site;
+use Statamic\Statamic;
 
 class Helper
 {
@@ -31,5 +32,22 @@ class Helper
         }
 
         return $entry;
+    }
+
+    public static function getNav(
+        $handle = '',
+        $site = ''
+    ) {
+        $handle = trim($handle);
+        $nav = [];
+
+        ray('foo');
+
+        ray(Statamic::tag('nav:'.$handle));
+
+        foreach (Statamic::tag('nav:'.$handle) ?: [] as $level) {
+        }
+
+        return $nav;
     }
 }
