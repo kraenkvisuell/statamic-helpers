@@ -8,18 +8,22 @@ use Statamic\Statamic;
 
 class Helper
 {
-    public static function getEntry(
-        $slug = '',
-        $collection = '',
-        $publishedOnly = true,
-        $site = ''
+    public function entry(
+        string $slug = '',
+        string $collection = 'pages',
+        bool $publishedOnly = true,
+        string $site = '',
+        array $select = [],
     ) {
         $site = $site ?: Site::current()->handle();
 
+        $select = $select ?: ['blueprint', 'content', 'title'];
+
         $builder = Entry::query()
-                ->where('collection', $collection)
-                ->where('slug', $slug)
-                ->where('site', $site);
+            ->where('collection', $collection)
+            ->where('slug', $slug)
+            ->where('site', $site)
+            ->select($select);
 
         if ($publishedOnly) {
             $builder->where('published', true);
@@ -34,20 +38,37 @@ class Helper
         return $entry;
     }
 
-    public static function getNav(
-        $handle = '',
-        $site = ''
+    public function nav(
+        string $slug = '',
+        string $site = '',
+        int $maxDepth = 0,
+        array $select = []
     ) {
-        $handle = trim($handle);
-        $nav = [];
+        $site = $site ?: Site::current()->handle();
 
-        ray('foo');
+        $select = array_unique(
+            array_merge(['title', 'is_current', 'url'], $select)
+        );
 
-        ray(Statamic::tag('nav:'.$handle));
+        $slug = trim($slug);
 
-        foreach (Statamic::tag('nav:'.$handle) ?: [] as $level) {
+        $params = [
+            'select' => implode('|', array_map('trim', $select)),
+        ];
+
+        if ($maxDepth) {
+            $params['max_depth'] = $maxDepth;
         }
 
-        return $nav;
+        return Statamic::tag('nav:'.$slug)
+            ->params($params)
+            ->fetch();
+    }
+
+    protected function getNavLevel($level)
+    {
+        //ray($level);
+
+        return $level;
     }
 }
