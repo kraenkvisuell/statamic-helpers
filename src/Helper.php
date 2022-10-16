@@ -9,9 +9,8 @@ use Statamic\Statamic;
 class Helper
 {
     public function entry(
-        string $slug = '',
+        string $slug = 'home',
         string $collection = 'pages',
-        bool $publishedOnly = true,
         string $site = '',
         array $select = [],
     ) {
@@ -19,33 +18,20 @@ class Helper
 
         $select = $select ?: ['blueprint', 'content', 'title'];
 
-        $builder = Entry::query()
+        return Entry::query()
             ->where('collection', $collection)
             ->where('slug', $slug)
             ->where('site', $site)
-            ->select($select);
-
-        if ($publishedOnly) {
-            $builder->where('published', true);
-        }
-
-        $entry = $builder->first();
-
-        if (! $entry) {
-            return null;
-        }
-
-        return $entry;
+            ->where('published', true)
+            ->select($select)
+            ->first();
     }
 
     public function nav(
         string $slug = '',
-        string $site = '',
         int $maxDepth = 0,
         array $select = []
     ) {
-        $site = $site ?: Site::current()->handle();
-
         $select = array_unique(
             array_merge(['title', 'is_current', 'url'], $select)
         );
@@ -65,10 +51,27 @@ class Helper
             ->fetch();
     }
 
-    protected function getNavLevel($level)
-    {
-        //ray($level);
+    public function global(
+        string $slug = '',
+        int $maxDepth = 0,
+        array $select = []
+    ) {
+        $select = array_unique(
+            array_merge(['title', 'is_current', 'url'], $select)
+        );
 
-        return $level;
+        $slug = trim($slug);
+
+        $params = [
+            'select' => implode('|', array_map('trim', $select)),
+        ];
+
+        if ($maxDepth) {
+            $params['max_depth'] = $maxDepth;
+        }
+
+        return Statamic::tag('nav:'.$slug)
+            ->params($params)
+            ->fetch();
     }
 }
