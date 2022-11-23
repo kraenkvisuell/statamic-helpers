@@ -1,28 +1,43 @@
 <?php
 
-use Kraenkvisuell\StatamicHelpers\Services\QueryService;
-use Statamic\Facades\Site;
+use Kraenkvisuell\StatamicHelpers\Facades\Helper;
 
-function statamic_published_entry(
-    $slug,
-    $collection
+function statamic_entry(
+    string $slug = 'home',
+    string $collection = 'pages',
+    string $site = '',
+    array $select = [],
 ) {
-    $site = Site::current()->handle();
-
-    return QueryService::findBySlug(
-        slug: $slug,
-        collection: $collection,
-        site: $site
+    return Helper::entry(
+        $slug,
+        $collection,
+        $site,
+        $select
     );
 }
 
-function statamic_entry(
-    $slug,
-    $collection
+function statamic_global(
+    string $slug = 'home',
+    string $collection = 'pages',
+    string $site = '',
+    array $select = [],
 ) {
-    return QueryService::findBySlug(
-        slug: $slug,
-        collection: $collection,
-        publishedOnly: false
+    return Helper::entry(
+        $slug,
+        $collection,
+        $site,
+        $select
+    );
+}
+
+function statamic_nav(
+    string $slug = '',
+    int $maxDepth = 0,
+    array $select = []
+) {
+    return Helper::hav(
+        $slug,
+        $maxDepth,
+        $select
     );
 }
