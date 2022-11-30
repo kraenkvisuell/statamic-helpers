@@ -81,10 +81,6 @@ class Helper
             return $cdn.'/'.$path;
         }
 
-        if (config('filesystems.disks.'.$disk.'.driver') == 's3') {
-            return Storage::disk($disk)->url($path);
-        }
-        
-        return asset($path);
+        return Storage::disk($disk)->url($path);
     }   
 }
