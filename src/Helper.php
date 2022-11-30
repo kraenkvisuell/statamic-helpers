@@ -2,9 +2,11 @@
 
 namespace Kraenkvisuell\StatamicHelpers;
 
-use Statamic\Facades\Entry;
-use Statamic\Facades\Site;
 use Statamic\Statamic;
+use Statamic\Facades\Site;
+use Statamic\Facades\Entry;
+use Statamic\Facades\GlobalSet;
+use Illuminate\Support\Facades\Storage;
 
 class Helper
 {
@@ -52,26 +54,37 @@ class Helper
     }
 
     public function global(
-        string $slug = '',
-        int $maxDepth = 0,
-        array $select = []
+        string $key = '',
+        string $site = ''
     ) {
-        $select = array_unique(
-            array_merge(['title', 'is_current', 'url'], $select)
-        );
+        $site = $site ?: Site::current()->handle();
 
-        $slug = trim($slug);
+        $keyArr = explode(':', $key);
 
-        $params = [
-            'select' => implode('|', array_map('trim', $select)),
-        ];
+        $handle = count($keyArr) > 1 ? $keyArr[0] : 'globals';
+        $field = $keyArr[count($keyArr) - 1];
 
-        if ($maxDepth) {
-            $params['max_depth'] = $maxDepth;
+        return GlobalSet::findByHandle($handle)
+            ->in($site)
+            ->get($field);
+    }
+
+    public function asset(
+        string $path = '',
+        string $disk = ''
+    ) {
+        $disk = $disk ?: 'assets';
+        
+        $cdn = config('filesystems.disks.'.$disk.'.cdn');
+        
+        if ($cdn) {
+            return $cdn.'/'.$path;
         }
 
-        return Statamic::tag('nav:'.$slug)
-            ->params($params)
-            ->fetch();
-    }
+        if (config('filesystems.disks.'.$disk.'.driver') == 's3') {
+            return Storage::disk($disk)->url($path);
+        }
+        
+        return asset($path);
+    }   
 }
