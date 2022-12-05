@@ -36,6 +36,8 @@ class HelperServiceProvider extends ServiceProvider
                 UploadTrees::class,
             ]);
         }
+
+        require_once __DIR__.'/../helpers/helpers.php';
     }
 
     public function register()
