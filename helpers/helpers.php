@@ -3,10 +3,10 @@
 use Kraenkvisuell\StatamicHelpers\Facades\Helper;
 
 function statamic_entry(
-    string $slug = 'home',
-    string $collection = 'pages',
-    string $site = '',
-    array $select = [],
+    $slug = 'home',
+    $collection = 'pages',
+    $site = '',
+    $select = [],
 ) {
     return Helper::entry(
         $slug,
@@ -17,9 +17,9 @@ function statamic_entry(
 }
 
 function statamic_nav(
-    string $slug = '',
-    int $maxDepth = 0,
-    array $select = []
+    $slug = '',
+    $maxDepth = 0,
+    $select = []
 ) {
     return Helper::hav(
         $slug,
@@ -29,8 +29,8 @@ function statamic_nav(
 }
 
 function statamic_global(
-    string $key = '',
-    string $site = ''
+    $key = '',
+    $site = ''
 ) {
     return Helper::global(
         $key,
@@ -39,8 +39,8 @@ function statamic_global(
 }
 
 function statamic_asset(
-    string $path = '',
-    string $disk = ''
+    $path = '',
+    $disk = ''
 ) {
     return Helper::asset(
         $path,
