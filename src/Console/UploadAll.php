@@ -7,11 +7,14 @@ use Illuminate\Console\Command;
 class UploadAll extends Command
 {
     public $signature = 'kv:upload-all
+        {--P|production} 
         {--C|clear}';
 
     public function handle()
     {
         $clear = $this->option('clear');
+        $production = $this->option('production');
+
         $message = $clear ? 'ACHTUNG! Alle bestehenden Dateien werden vorher gelöscht!'
                           : 'ACHTUNG! Es werden Dateien hinzugefügt!';
 
@@ -20,19 +23,19 @@ class UploadAll extends Command
         }
 
         $this->call('kv:upload-assets', [
-            '--clear' => $clear, '--force' => true,
+            '--clear' => $clear, '--production' => $production, '--force' => true,
         ]);
 
         $this->call('kv:upload-collections', [
-            '--clear' => $clear, '--force' => true,
+            '--clear' => $clear, '--production' => $production, '--force' => true,
         ]);
 
         $this->call('kv:upload-globals', [
-            '--clear' => $clear, '--force' => true,
+            '--clear' => $clear, '--production' => $production, '--force' => true,
         ]);
 
         $this->call('kv:upload-trees', [
-            '--clear' => $clear, '--force' => true,
+            '--clear' => $clear, '--production' => $production, '--force' => true,
         ]);
 
         $this->info('Upload beendet');
