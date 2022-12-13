@@ -159,6 +159,10 @@ class Helper
         $path = '',
         $disk = ''
     ) {
+        if (stristr($path, '::')) {
+            $disk = $disk ?: Str::beforeLast($path, '::');
+            $path = Str::afterLast($path, '::');
+        }
         $disk = $disk ?: 'assets';
         
         $cdn = config('filesystems.disks.'.$disk.'.cdn');
