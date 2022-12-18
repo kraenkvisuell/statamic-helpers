@@ -166,9 +166,10 @@ class Helper
         $disk = $disk ?: 'assets';
         
         $cdn = config('filesystems.disks.'.$disk.'.cdn');
+        $root = config('filesystems.disks.'.$disk.'.root');
         
         if ($cdn) {
-            return $cdn.'/'.$path;
+            return $cdn.'/'.($root ? $root.'/' : '').$path;
         }
 
         return Storage::disk($disk)->url($path);
