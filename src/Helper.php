@@ -183,7 +183,7 @@ class Helper
 
         $images = Statamic::tag('glide:generate')
             ->src($url)
-            ->width(1000)
+            ->width(1500)
             ->fit('max')
             ->quality(90);
 
