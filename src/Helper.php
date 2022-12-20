@@ -175,6 +175,24 @@ class Helper
         return Storage::disk($disk)->url($path);
     }   
 
+    public function glide(
+        $path = '',
+        $disk = ''
+    ) {
+        $url = $this->asset($path, $disk);
+
+        $images = Statamic::tag('glide:generate')
+            ->src($url)
+            ->width(1000)
+            ->fit('max')
+            ->quality(90);
+
+            foreach ($images as $image) {
+                return $image['url'] ?? '';
+            }
+
+    }   
+
     protected function cleaned($rawValue)
     {
         $cleanedValue = $rawValue;

@@ -47,3 +47,13 @@ function statamic_asset(
         $disk
     );
 }
+
+function statamic_glide(
+    $path = '',
+    $disk = ''
+) {
+    return Helper::glide(
+        $path,
+        $disk
+    );
+}
