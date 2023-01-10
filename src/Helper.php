@@ -24,6 +24,50 @@ class Helper
         'updated_by',
     ];
 
+    public function entries(
+        $collection = 'pages',
+        $site = '',
+        array $select = [],
+        bool $hideInternals = true,
+    ) {
+        $site = $site ?: Site::current()->handle();
+
+        $query = Entry::query()
+            ->where('collection', $collection)
+            ->where('site', $site)
+            ->where('published', true);
+
+        if ($select) {
+            $query->select($select);
+        }
+
+        $entries = $query->get();
+
+        if (!$entries) {
+            return [];
+        }
+
+        if (!$hideInternals) {
+            return $entries;
+        }
+
+        $cleanedEntries = [];
+
+       foreach($entries as $entry) {
+            $cleaned = [];
+
+            foreach ($entry->toArray() as $rawKey => $rawValue) {
+                if (!in_array($rawKey, $this->forbidden)) {
+                    $cleaned[$rawKey] = $this->cleaned($rawValue);
+                }
+            }
+            
+            $cleanedEntries[] = $cleaned;
+        }
+
+        return $cleanedEntries;
+    }
+
     public function entry(
         $slug = 'home',
         $collection = 'pages',

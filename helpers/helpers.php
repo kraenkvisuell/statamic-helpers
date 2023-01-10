@@ -2,6 +2,18 @@
 
 use Kraenkvisuell\StatamicHelpers\Facades\Helper;
 
+function statamic_entries(
+    $collection = 'pages',
+    $site = '',
+    $select = [],
+) {
+    return Helper::entries(
+        $collection,
+        $site,
+        $select
+    );
+}
+
 function statamic_entry(
     $slug = 'home',
     $collection = 'pages',
