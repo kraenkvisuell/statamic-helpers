@@ -132,14 +132,25 @@ class Helper
     }
 
     public function allNavs() {
-        
-        $folders = scandir(base_path('content/navigation')) ?: [];
         $navs = [];
 
-        foreach($folders as $folder) {
-            if (!Str::startsWith($folder, '.') && Str::endsWith($folder, '.yaml')) {
-                $handle = Str::beforeLast($folder, '.');
+        $navigationFiles = scandir(base_path('content/navigation')) ?: [];
+        foreach($navigationFiles as $navigationFile) {
+            if (!Str::startsWith($navigationFile, '.') && Str::endsWith($navigationFile, '.yaml')) {
+                $handle = Str::beforeLast($navigationFile, '.');
                 $navs[$handle] = $this->nav($handle);
+            }
+        }
+        
+        if (!is_dir(base_path('content/trees/collections'))) {
+            return $navs;
+        }
+
+        $collectionFiles = scandir(base_path('content/trees/collections')) ?: [];
+        foreach($collectionFiles as $collectionFile) {
+            if (!Str::startsWith($collectionFile, '.') && Str::endsWith($collectionFile, '.yaml')) {
+                $handle = Str::beforeLast($collectionFile, '.');
+                $navs['collection:'.$handle] = $this->nav('collection:'.$handle);
             }
         }
 
