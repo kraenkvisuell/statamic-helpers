@@ -150,7 +150,7 @@ class Helper
         foreach($collectionFiles as $collectionFile) {
             if (!Str::startsWith($collectionFile, '.') && Str::endsWith($collectionFile, '.yaml')) {
                 $handle = Str::beforeLast($collectionFile, '.');
-                $navs['collection:'.$handle] = $this->nav('collection:'.$handle);
+                $navs['collection.'.$handle] = $this->nav('collection:'.$handle);
             }
         }
 
