@@ -24,6 +24,11 @@ class Helper
         'updated_by',
     ];
 
+    public function isPreview()
+    {
+        return request()->get('preview') || request()->get('live-preview');
+    }
+
     public function entries(
         $collection = 'pages',
         $site = '',
