@@ -94,6 +94,7 @@ class Helper
         $site = '',
         $select = [],
         $hideInternals = true,
+        $withChildren = false,
     ) {
         $site = $site ?: Site::current()->handle();
 
@@ -117,16 +118,22 @@ class Helper
             return [];
         }
 
+        $entry = $entry->toArray();
+
         if ($hideInternals) {
             $cleaned = [];
 
-            foreach ($entry->toArray() as $rawKey => $rawValue) {
+            foreach ($entry as $rawKey => $rawValue) {
                 if (!in_array($rawKey, $this->forbidden)) {
                     $cleaned[$rawKey] = $this->cleaned($rawValue);
                 }
             }
             
-            return $cleaned;
+            $entry = $cleaned;
+        }
+
+        if ($withChildren) {
+            $entry['children'] = $this->childrenOf($entry);
         }
 
         return $entry;
