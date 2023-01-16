@@ -70,6 +70,20 @@ class Helper
             $cleanedEntries[] = $cleaned;
         }
 
+        $nav = Statamic::tag('nav:collection:'.$collection)->fetch();
+
+        if ($nav) {
+            $sortedEntries = [];
+
+            foreach($nav as $navItem) {
+                $sortedEntries[] = collect($cleanedEntries)
+                    ->firstWhere('id', $navItem['entry_id']->raw());
+            }
+
+            return $sortedEntries;
+        }
+
+
         return $cleanedEntries;
     }
 

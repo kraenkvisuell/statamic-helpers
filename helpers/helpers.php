@@ -15,6 +15,7 @@ function statamic_entries(
 }
 
 function statamic_entry(
+    $id = null,
     $slug = 'home',
     $collection = 'pages',
     $site = '',
@@ -31,12 +32,14 @@ function statamic_entry(
 function statamic_nav(
     $slug = '',
     $maxDepth = 0,
-    $select = []
+    $select = [],
+    $withFullEntry = false
 ) {
     return Helper::hav(
         $slug,
         $maxDepth,
-        $select
+        $select,
+        $withFullEntry
     );
 }
 
