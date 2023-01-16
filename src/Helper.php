@@ -88,25 +88,31 @@ class Helper
     }
 
     public function entry(
+        $id = null,
         $slug = 'home',
         $collection = 'pages',
         $site = '',
-        array $select = [],
-        bool $hideInternals = true,
+        $select = [],
+        $hideInternals = true,
     ) {
         $site = $site ?: Site::current()->handle();
 
-        $query = Entry::query()
-            ->where('collection', $collection)
-            ->where('slug', $slug)
-            ->where('site', $site)
-            ->where('published', true);
+        if ($id) {
+            $entry = Entry::find($id);
+        } else {
+            $query = Entry::query()
+                ->where('collection', $collection)
+                ->where('slug', $slug)
+                ->where('site', $site)
+                ->where('published', true);
 
-        if ($select) {
-            $query->select($select);
+            if ($select) {
+                $query->select($select);
+            }
+
+            $entry = $query->first();
         }
-
-        $entry = $query->first();
+        
         if (!$entry) {
             return [];
         }
@@ -126,13 +132,34 @@ class Helper
         return $entry;
     }
 
+    public function childrenOf($entry) {
+        $children = [];
+        ray($entry['collection']['handle']);
+
+        $nav = Statamic::tag('nav:collection:'.$entry['collection']['handle'])
+            ->params([
+                'from' => $entry['url']
+            ])
+            ->fetch();
+
+        if ($nav) {
+            foreach($nav as $navItem) {
+                $children[] = $this->entry(
+                    id: $navItem['id']
+                );
+            }
+        }
+
+        return $children;
+    }
+
     public function nav(
         $slug = '',
         $maxDepth = 0,
         $select = []
     ) {
         $select = array_unique(
-            array_merge(['title', 'is_current', 'url'], $select)
+            array_merge(['title', 'is_current', 'url', 'id', 'entry_id'], $select)
         );
 
         $slug = trim($slug);
@@ -265,7 +292,6 @@ class Helper
             foreach ($images as $image) {
                 return $image['url'] ?? '';
             }
-
     }   
 
     protected function cleaned($rawValue)
