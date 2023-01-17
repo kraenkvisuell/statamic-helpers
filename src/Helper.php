@@ -313,11 +313,11 @@ class Helper
                     if (is_array($value)) {
                         $cleanedValue[$key] = $this->cleaned($value);
                     } else {
-                        if ($key != 'url' && $key != 'id' && !stristr($key, '_id') && is_string($value)) {
-                            $cleanedValue[$key] = $this->cleanedValue($value);
-                        } elseif ($key == 'url' && $isAsset && $path && !$value) {
+                        if ($key == 'url' && $isAsset && $path && !$value) {
                             $disk = $rawValue['container']['disk'] ?? '';
                             $cleanedValue[$key] = Helper::asset($path, $disk);
+                        } else {
+                            $cleanedValue[$key] = $this->cleanedValue($value, $key);
                         }
                     }
                 }
@@ -327,16 +327,19 @@ class Helper
         return $cleanedValue;
     }
 
-    protected function cleanedValue($value)
+    protected function cleanedValue($value, $key)
     {
-        if (is_string($value) && Str::substrCount($value, '-', 2) == 4) {
-            
+        if (
+            is_string($value) 
+            && $key != 'url' 
+            && $key != 'id' 
+            && !stristr($key, '_id')
+            && Str::substrCount($value, '-', 2) == 4
+        ) { 
             $entry = $this->entry($value);
             if ($entry) {
                 return $entry;
             }
-
-            return $value;
         }
 
         return $value;
