@@ -311,9 +311,6 @@ class Helper
             foreach($rawValue as $key => $value) {
                 if (!in_array($key, $this->forbidden)) {
                     if (is_array($value)) {
-                        if ($key == 'image') {
-                            ray($value);
-                        }
                         $cleanedValue[$key] = $this->cleaned($value);
                     } else {
                         if ($key != 'url' && $key != 'id' && !stristr($key, '_id') && is_string($value)) {
@@ -338,6 +335,8 @@ class Helper
             if ($entry) {
                 return $entry;
             }
+
+            return $value;
         }
 
         return $value;
