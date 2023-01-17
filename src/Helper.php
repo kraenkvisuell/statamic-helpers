@@ -141,8 +141,6 @@ class Helper
 
     public function childrenOf($entry) {
         $children = [];
-        ray($entry['collection']['handle']);
-
         $nav = Statamic::tag('nav:collection:'.$entry['collection']['handle'])
             ->params([
                 'from' => $entry['url']
@@ -313,9 +311,12 @@ class Helper
             foreach($rawValue as $key => $value) {
                 if (!in_array($key, $this->forbidden)) {
                     if (is_array($value)) {
+                        if ($key == 'image') {
+                            ray($value);
+                        }
                         $cleanedValue[$key] = $this->cleaned($value);
                     } else {
-                        if ($key != 'id' && !stristr($key, '_id') && is_string($value)) {
+                        if ($key != 'url' && $key != 'id' && !stristr($key, '_id') && is_string($value)) {
                             $cleanedValue[$key] = $this->cleanedValue($value);
                         } elseif ($key == 'url' && $isAsset && $path && !$value) {
                             $disk = $rawValue['container']['disk'] ?? '';
