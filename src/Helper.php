@@ -184,14 +184,16 @@ class Helper
             ->fetch();
     }
 
-    public function allNavs() {
+    public function allNavs(
+        $select = []
+    ) {
         $navs = [];
 
         $navigationFiles = scandir(base_path('content/navigation')) ?: [];
         foreach($navigationFiles as $navigationFile) {
             if (!Str::startsWith($navigationFile, '.') && Str::endsWith($navigationFile, '.yaml')) {
                 $handle = Str::beforeLast($navigationFile, '.');
-                $navs[$handle] = $this->nav($handle);
+                $navs[$handle] = $this->nav(slug: $handle, select: $select);
             }
         }
         
@@ -204,7 +206,7 @@ class Helper
         foreach($collectionFiles as $collectionFile) {
             if (!Str::startsWith($collectionFile, '.') && Str::endsWith($collectionFile, '.yaml')) {
                 $handle = Str::beforeLast($collectionFile, '.');
-                $navs['collection'][$handle] = $this->nav('collection:'.$handle);
+                $navs['collection'][$handle] = $this->nav(slug: 'collection:'.$handle, select: $select);
             }
         }
 
