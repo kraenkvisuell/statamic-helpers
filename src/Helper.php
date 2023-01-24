@@ -336,6 +336,7 @@ class Helper
             && $key != 'url' 
             && $key != 'id' 
             && !stristr($key, '_id')
+            && strlen($value) > 9
             && Str::substrCount($value, '-', 2) == 4
         ) { 
             $entry = $this->entry($value);
