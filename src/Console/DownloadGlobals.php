@@ -27,7 +27,7 @@ class DownloadGlobals extends Command
         $host = config('statamic-helpers.remote.'.$env.'.ssh_host');
         $sshPath = config('statamic-helpers.remote.'.$env.'.ssh_path');
         $globalsPath = 'content/globals';
-        $localPath = base_path($globalsPath);
+        $localPath = base_path('content');
 
         $remoteString = $user.'@'.$host.':'.'/'.$sshPath;
 
@@ -36,13 +36,13 @@ class DownloadGlobals extends Command
 
         if ($mode == 'clear') {
             exec(
-                'rm -rf '.$localPath.'/*'
+                'rm -rf '.$localPath.'/globals'
             );
         }
 
         exec(
             'scp -r '
-            .$remoteString.'/'.$globalsPath.'/* '
+            .$remoteString.'/'.$globalsPath.' '
             .$localPath
         );
 
