@@ -95,11 +95,16 @@ class Helper
         $select = [],
         $hideInternals = true,
         $withChildren = false,
+        $flat = false,
     ) {
         $site = $site ?: Site::current()->handle();
 
         if ($id) {
             $entry = Entry::find($id);
+            
+            if ($flat) {
+                return $entry;
+            }
         } else {
             $query = Entry::query()
                 ->where('collection', $collection)
@@ -306,6 +311,8 @@ class Helper
         $cleanedValue = $rawValue;
 
         if (is_array($rawValue)) {
+           
+
             $cleanedValue = [];
             $isAsset = $rawValue['is_asset'] ?? false;
             $path = $rawValue['path'] ?? '';
@@ -339,7 +346,12 @@ class Helper
             && strlen($value) > 9
             && Str::substrCount($value, '-', 2) == 4
         ) { 
-            $entry = $this->entry($value);
+            $entry = $this->entry(
+                id: $value,
+                withChildren: false,
+                flat: true
+            );
+            
             if ($entry) {
                 return $entry;
             }
