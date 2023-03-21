@@ -4,8 +4,10 @@ namespace Kraenkvisuell\StatamicHelpers;
 
 use Statamic\Statamic;
 use Statamic\Facades\Site;
+use Statamic\Facades\Term;
 use Illuminate\Support\Str;
 use Statamic\Facades\Entry;
+use Statamic\Facades\Taxonomy;
 use Statamic\Facades\GlobalSet;
 use Illuminate\Support\Facades\Storage;
 
@@ -60,10 +62,16 @@ class Helper
 
        foreach($entries as $entry) {
             $cleaned = [];
-
+            
             foreach ($entry->toArray() as $rawKey => $rawValue) {
                 if (!in_array($rawKey, $this->forbidden)) {
-                    $cleaned[$rawKey] = $this->cleaned($rawValue);
+                    
+                    if ($taxonomy = Taxonomy::findByHandle($rawKey)) {
+                        $cleaned[$rawKey] = $this->hydratedTaxonomies($rawKey, $rawValue);
+                    } else {
+                        $cleaned[$rawKey] = $this->cleaned($rawValue);
+                    }
+                    
                 }
             }
             
@@ -269,6 +277,23 @@ class Helper
         return $globals;
     }
 
+    protected function hydratedTaxonomies(
+        $handle = '',
+        $slugs = []
+    ) {
+        $taxonomies = Term::query()
+            ->where('taxonomy', $handle)
+            ->get()
+            ->filter(function ($term) use ($slugs) {
+                return in_array($term->slug(), $slugs);
+            })
+            ->map(function ($term) {
+                return $term->toArray();
+            });
+
+        return $taxonomies;
+    }   
+
     public function asset(
         $path = '',
         $disk = ''
@@ -316,8 +341,14 @@ class Helper
             $cleanedValue = [];
             $isAsset = $rawValue['is_asset'] ?? false;
             $path = $rawValue['path'] ?? '';
-
             foreach($rawValue as $key => $value) {
+                // ray($key);
+                // if ($key == 'event_categories') {
+                //     ray($value);
+                // }
+           
+
+            
                 if (!in_array($key, $this->forbidden)) {
                     if (is_array($value)) {
                         $cleanedValue[$key] = $this->cleaned($value);
