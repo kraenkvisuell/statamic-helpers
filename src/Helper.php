@@ -36,6 +36,8 @@ class Helper
         $site = '',
         array $select = [],
         bool $hideInternals = true,
+        $orderBy = '',
+        $orderDirection = 'asc',
     ) {
         $site = $site ?: Site::current()->handle();
 
@@ -43,6 +45,10 @@ class Helper
             ->where('collection', $collection)
             ->where('site', $site)
             ->where('published', true);
+
+        if ($orderBy) {
+            $query->orderBy($orderBy, $orderDirection);
+        }
 
         if ($select) {
             $query->select($select);
