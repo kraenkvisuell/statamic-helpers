@@ -3,16 +3,17 @@
 namespace Kraenkvisuell\StatamicHelpers;
 
 use Illuminate\Support\ServiceProvider;
-use Kraenkvisuell\StatamicHelpers\Console\DownloadAll;
-use Kraenkvisuell\StatamicHelpers\Console\DownloadAssets;
-use Kraenkvisuell\StatamicHelpers\Console\DownloadCollections;
-use Kraenkvisuell\StatamicHelpers\Console\DownloadGlobals;
-use Kraenkvisuell\StatamicHelpers\Console\DownloadTrees;
 use Kraenkvisuell\StatamicHelpers\Console\UploadAll;
-use Kraenkvisuell\StatamicHelpers\Console\UploadAssets;
-use Kraenkvisuell\StatamicHelpers\Console\UploadCollections;
-use Kraenkvisuell\StatamicHelpers\Console\UploadGlobals;
+use Kraenkvisuell\StatamicHelpers\Console\DownloadAll;
 use Kraenkvisuell\StatamicHelpers\Console\UploadTrees;
+use Kraenkvisuell\StatamicHelpers\Console\UploadAssets;
+use Kraenkvisuell\StatamicHelpers\Console\DownloadTrees;
+use Kraenkvisuell\StatamicHelpers\Console\UploadGlobals;
+use Kraenkvisuell\StatamicHelpers\Console\DownloadAssets;
+use Kraenkvisuell\StatamicHelpers\Console\DownloadGlobals;
+use Kraenkvisuell\StatamicHelpers\Console\GenerateDummySite;
+use Kraenkvisuell\StatamicHelpers\Console\UploadCollections;
+use Kraenkvisuell\StatamicHelpers\Console\DownloadCollections;
 
 class HelperServiceProvider extends ServiceProvider
 {
@@ -24,6 +25,7 @@ class HelperServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([
+                GenerateDummySite::class,
                 DownloadAll::class,
                 DownloadAssets::class,
                 DownloadCollections::class,

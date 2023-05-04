@@ -110,6 +110,7 @@ class Helper
         $hideInternals = true,
         $withChildren = false,
         $flat = false,
+        $isHome = false,
     ) {
         $site = $site ?: Site::current()->handle();
 
@@ -119,7 +120,19 @@ class Helper
             if ($flat) {
                 return $entry;
             }
-        } else {
+        } elseif($isHome) {
+            $entry = Entry::query()
+                ->where('collection', $collection)
+                ->where('is_home', true)
+                ->where('site', $site)
+                ->where('published', true)
+                ->first();
+
+            if ($flat) {
+                return $entry;
+            }
+        } 
+        else {
             $query = Entry::query()
                 ->where('collection', $collection)
                 ->where('slug', $slug)
@@ -131,6 +144,10 @@ class Helper
             }
 
             $entry = $query->first();
+
+            if ($flat) {
+                return $entry;
+            }
         }
         
         if (!$entry) {

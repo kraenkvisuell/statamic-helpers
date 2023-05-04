@@ -18,14 +18,12 @@
     },
     "require-dev": {
         "laravel/pint": "^1.1",
-        "orchestra/testbench": "^7.6"
+        "orchestra/testbench": "^7.6",
+        "statamic/cms": "3.4.*"
     },
     "config": {
         "allow-plugins": {
             "pixelfear/composer-dist-plugin": true
         }
-    },
-    "require": {
-        "statamic/cms": "^3.3"
     }
 }
