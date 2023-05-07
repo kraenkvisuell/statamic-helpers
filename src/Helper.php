@@ -10,6 +10,7 @@ use Statamic\Facades\Entry;
 use Statamic\Facades\Taxonomy;
 use Statamic\Facades\GlobalSet;
 use Illuminate\Support\Facades\Storage;
+use Statamic\Facades\Nav;
 
 class Helper
 {
@@ -20,7 +21,6 @@ class Helper
         'last_modified_instance',
         'last_modified', 
         'mount',
-        'origin_id',
         'private',
         'published',
         'updated_by',
@@ -103,6 +103,7 @@ class Helper
 
     public function entry(
         $id = null,
+        $originId = null,
         $slug = 'home',
         $collection = 'pages',
         $site = '',
@@ -135,9 +136,14 @@ class Helper
         else {
             $query = Entry::query()
                 ->where('collection', $collection)
-                ->where('slug', $slug)
                 ->where('site', $site)
                 ->where('published', true);
+
+            if ($originId) {
+                $query->where('origin', $originId);
+            } else {
+                $query->where('slug', $slug);
+            }
 
             if ($select) {
                 $query->select($select);
@@ -213,9 +219,11 @@ class Helper
             $params['max_depth'] = $maxDepth;
         }
 
-        return Statamic::tag('nav:'.$slug)
+        $nav = Statamic::tag('nav:'.$slug)
             ->params($params)
             ->fetch();
+
+        return $nav;
     }
 
     public function allNavs(
