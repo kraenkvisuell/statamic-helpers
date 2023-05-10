@@ -10,7 +10,6 @@ use Statamic\Facades\Entry;
 use Statamic\Facades\Taxonomy;
 use Statamic\Facades\GlobalSet;
 use Illuminate\Support\Facades\Storage;
-use Statamic\Facades\Nav;
 
 class Helper
 {
@@ -325,9 +324,31 @@ class Helper
         return $taxonomies;
     }   
 
+    public function generatePresets($rawValue, $originalUrl) {
+        $presets = [];
+
+        $presetDisk = config('statamic-helpers.preset_disk') ?: 'presets';
+        
+        $cdn = config('filesystems.disks.'.$presetDisk.'.cdn');
+        $root = config('filesystems.disks.'.$presetDisk.'.root');
+        
+        foreach (config('statamic-helpers.presets') ?: [] as $presetKey => $preset) {
+            if ($rawValue['mime_type'] != 'image/jpeg' && $rawValue['mime_type'] != 'image/png') {
+                $presets[$presetKey] = $originalUrl;
+            } elseif ($cdn) {
+                $presets[$presetKey] = $cdn.'/'.($root ? $root.'/' : '').$presetKey.'/'.$rawValue['path'];
+            } else {
+                $presets[$presetKey] = Storage::disk($presetDisk)->url($rawValue['path']);
+            }
+        }
+        
+        return $presets;
+    }   
+
     public function asset(
         $path = '',
-        $disk = ''
+        $disk = '',
+        $useCdn = true,
     ) {
         if (stristr($path, '::')) {
             $disk = $disk ?: Str::beforeLast($path, '::');
@@ -338,7 +359,7 @@ class Helper
         $cdn = config('filesystems.disks.'.$disk.'.cdn');
         $root = config('filesystems.disks.'.$disk.'.root');
         
-        if ($cdn) {
+        if ($useCdn && $cdn) {
             return $cdn.'/'.($root ? $root.'/' : '').$path;
         }
 
@@ -373,13 +394,6 @@ class Helper
             $isAsset = $rawValue['is_asset'] ?? false;
             $path = $rawValue['path'] ?? '';
             foreach($rawValue as $key => $value) {
-                // ray($key);
-                // if ($key == 'event_categories') {
-                //     ray($value);
-                // }
-           
-
-            
                 if (!in_array($key, $this->forbidden)) {
                     if (is_array($value)) {
                         $cleanedValue[$key] = $this->cleaned($value);
@@ -387,6 +401,7 @@ class Helper
                         if ($key == 'url' && $isAsset && $path && !$value) {
                             $disk = $rawValue['container']['disk'] ?? '';
                             $cleanedValue[$key] = Helper::asset($path, $disk);
+                            $cleanedValue['presets'] = $this->generatePresets($rawValue, $cleanedValue[$key]);
                         } else {
                             $cleanedValue[$key] = $this->cleanedValue($value, $key);
                         }
@@ -411,7 +426,6 @@ class Helper
             $entry = $this->entry(
                 id: $value,
                 withChildren: false,
-                flat: true
             );
             
             if ($entry) {

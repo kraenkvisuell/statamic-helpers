@@ -2,6 +2,8 @@
 
 namespace Kraenkvisuell\StatamicHelpers;
 
+use Statamic\Events\AssetUploaded;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Kraenkvisuell\StatamicHelpers\Console\UploadAll;
 use Kraenkvisuell\StatamicHelpers\Console\DownloadAll;
@@ -14,11 +16,18 @@ use Kraenkvisuell\StatamicHelpers\Console\DownloadGlobals;
 use Kraenkvisuell\StatamicHelpers\Console\GenerateDummySite;
 use Kraenkvisuell\StatamicHelpers\Console\UploadCollections;
 use Kraenkvisuell\StatamicHelpers\Console\DownloadCollections;
+use Kraenkvisuell\StatamicHelpers\Console\RecreateAllPresets;
+use Kraenkvisuell\StatamicHelpers\Listeners\HandleAssetUploads;
 
 class HelperServiceProvider extends ServiceProvider
 {
     public function boot()
     {
+        Event::listen(
+            AssetUploaded::class,
+            [HandleAssetUploads::class, 'handle']
+        );
+        
         $this->publishes([
             __DIR__.'/../config/statamic-helpers.php' => config_path('statamic-helpers.php'),
         ], 'statamic-helpers');
@@ -26,6 +35,7 @@ class HelperServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 GenerateDummySite::class,
+                RecreateAllPresets::class,
                 DownloadAll::class,
                 DownloadAssets::class,
                 DownloadCollections::class,
