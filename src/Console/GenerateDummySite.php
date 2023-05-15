@@ -124,11 +124,13 @@ class GenerateDummySite extends Command
         foreach($this->getPagesForMainMenu() as $pageIndex => $page) {
             $data = [
                 'id' => Str::uuid()->toString(),
-                'entry' => $page->id(),
             ];
 
             if ($pageIndex > 0 && $pageIndex < 3) {
+                $data['title'] = ucfirst(fake()->words(rand(2, 3), true));
                 $data['children'] = $this->getSubPagesForMainMenu($pageIndex);
+            } else {
+                $data['entry'] = $page->id();
             }
 
             $pagesForNav['default'][] = $data;
