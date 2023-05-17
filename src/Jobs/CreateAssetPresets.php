@@ -26,7 +26,7 @@ class CreateAssetPresets implements ShouldQueue
         $meta = $this->asset->meta() ?? null;
         $presets = config('statamic-helpers.presets');
         $mimeType = $meta['mime_type'];
-
+        
         if (
             config('statamic-helpers.preset_on_upload') 
             && $presets
@@ -43,6 +43,8 @@ class CreateAssetPresets implements ShouldQueue
             $url = Helper::asset(path: $assetPath, disk: $assetDisk, useCdn: false);
             
             foreach ($presets as $presetKey => $preset) {
+                
+                
                 $img = Image::make($url);
     
                 $width = $preset['w'] ?? null;
@@ -57,9 +59,7 @@ class CreateAssetPresets implements ShouldQueue
                 }
 
                 $img->encode($format, $quality);
-
-                //$resource = $img->stream()->detach();
-
+                
                 Storage::disk($presetDisk)->put($presetKey.'/'.$assetPath, $img, 'public');
             }
         }

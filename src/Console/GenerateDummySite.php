@@ -53,16 +53,7 @@ class GenerateDummySite extends Command
     {
         $entry = Entry::make()->collection('pages')->slug('home');
         $entry->set('title', 'Home');
-        $entry->set('main_replicator', [
-            [
-                'id' => Str::random(8),
-                'headline' => 'Home',
-                'headline_level' => 'h2',
-                'kind' => 'random_url',
-                'type' => 'image',
-                'enabled' => true,
-            ],
-        ]);
+        $entry->set('main_replicator', $this->generateMainContent());
 
         $entry->save();
 
@@ -86,16 +77,7 @@ class GenerateDummySite extends Command
 
             $entry = Entry::make()->collection('pages')->slug($slug);
             $entry->set('title', $title);
-            $entry->set('main_replicator', [
-                [
-                    'id' => Str::random(8),
-                    'headline' => ucfirst(fake()->words(rand(2, 4), true)),
-                    'headline_level' => 'h2',
-                    'kind' => 'random_url',
-                    'type' => 'image',
-                    'enabled' => true,
-                ],
-            ]);
+            $entry->set('main_replicator', $this->generateMainContent());
 
             $entry->save();
 
@@ -199,7 +181,6 @@ class GenerateDummySite extends Command
                 'entry' => $page->id(),
             ];
 
-            ray($pageIndex);
             if ($pageIndex == 0) {
                 $page->set('title', 'Kontakt')->slug('kontakt');
 
@@ -207,6 +188,8 @@ class GenerateDummySite extends Command
                     $sitePage->set('title', 'Contact')->slug('contact');
                     $sitePage->save();
                 }
+
+                $page->save();
             } elseif ($pageIndex == 1) {
                 $page->set('title', 'Impressum')->slug('impressum');
                 
@@ -214,6 +197,8 @@ class GenerateDummySite extends Command
                     $sitePage->set('title', 'Imprint')->slug('imprint');
                     $sitePage->save();
                 }
+
+                $page->save();
             } elseif ($pageIndex == 2) {
                 $page->set('title', 'Datenschutz')->slug('datenschutz');
 
@@ -221,9 +206,9 @@ class GenerateDummySite extends Command
                     $sitePage->set('title', 'Privacy Policy')->slug('privacy-policy');
                     $sitePage->save();
                 }
-            }
 
-            $page->save();
+                $page->save();
+            }
 
             $pagesForNav['default'][] = $data;
 
@@ -290,5 +275,215 @@ class GenerateDummySite extends Command
             ->where('slug', '!=', 'home')
             ->get()
             ->take(-3);
+    }
+
+    protected function generateMainContent()
+    {
+        $elements = [
+            'image' => [
+                'count' => rand(1, 4),
+            ],
+            'text' => [
+                'count' => rand(1, 4),
+            ],
+            'video' => [
+                'count' => rand(1, 2),
+            ],
+        ];
+
+        $content = [];
+
+        foreach ($elements as $handle => $params) {
+            for($n = 0; $n < $params['count']; $n++) {
+                $item = [
+                    'id' => Str::random(8),
+                    'enabled' => true,
+                    'type' => $handle,
+                ];
+
+                if (rand(0, 10) >= 3) {
+                    $item['headline'] = ucfirst(fake()->words(rand(2, 4), true));
+                    $item['headline_level'] = 'h2';
+                }
+
+                if (($handle == 'image' || $handle == 'video') && rand(0, 2) > 0) {
+                    $item['caption'] = fake()->sentences(rand(2, 4), true);
+                }
+
+                if (($handle == 'image' || $handle == 'video') && rand(0, 2) >= 0) {
+                    $item['credits'] = 'Krænk Visuell';
+                }
+
+                if ($handle == 'image') {
+                    $item['image_kind'] = 'random_url';
+                }
+
+                if ($handle == 'video') {
+                    $video = $this->dummyEmbedCode();
+                    $item['video_kind'] = 'embed';
+                    $item['embed_code'] = $video['code'];
+                    $item['aspect_width'] = $video['width'];
+                    $item['aspect_height'] = $video['height'];
+                }
+
+                if ($handle == 'text') {
+                    $item['text'] = $this->dummyText();
+                }
+
+                $content[] = $item;
+            }
+        }
+
+        shuffle($content);
+
+        return $content;
+    }
+
+    protected function dummyEmbedCode()
+    {
+        $codes = [
+            [
+                'width' => 16,
+                'height' => 9,
+                'code' => '<iframe title="vimeo-player" src="https://player.vimeo.com/video/276794240?h=f4a5fcab38" width="640" height="360" frameborder="0"    allowfullscreen></iframe>',
+            ],
+            [
+                'width' => 16,
+                'height' => 9,
+                'code' => '<iframe src="https://player.vimeo.com/video/528761014?h=a9eeae6207" width="640" height="356" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+                    <p><a href="https://vimeo.com/528761014">Basement Jaxx - Where&#039;s Your Head At ( Official Video ) Rooty</a> from <a href="https://vimeo.com/user136338298">RoVa</a> on <a href="https://vimeo.com">Vimeo</a>.</p>',
+            ],
+            [
+                'width' => 4,
+                'height' => 3,
+                'code' => '<iframe src="https://player.vimeo.com/video/6433175?h=d0edb14bbe" width="640" height="480" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+                <p><a href="https://vimeo.com/6433175">Queens Of The Stone Age - No One Knows</a> from <a href="https://vimeo.com/user2247357">Pecas</a> on <a href="https://vimeo.com">Vimeo</a>.</p>',
+            ],
+            [
+                'width' => 16,
+                'height' => 9,
+                'code' => '<iframe width="560" height="315" src="https://www.youtube.com/embed/dapqMeQCdcs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>',
+            ],
+            [
+                'width' => 16,
+                'height' => 9,
+                'code' => '<iframe width="560" height="315" src="https://www.youtube.com/embed/XbByxzZ-4dI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>',
+            ],
+            [
+                'width' => 16,
+                'height' => 9,
+                'code' => '<iframe width="560" height="315" src="https://www.youtube.com/embed/iTxOKsyZ0Lw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>',
+            ]
+        ];
+
+        return $codes[rand(0, count($codes)-1)];
+    }
+
+    protected function dummyText()
+    {
+        $text = [];
+
+        $elements = [
+            'paragraph' => [
+                'count' => rand(1, 4),
+                'links' => true,
+            ],
+            // 'bulletList' => [
+            //     'count' => rand(0, 1),
+            //     'items' => rand(2, 5),
+            // ],
+        ];
+
+        foreach ($elements as $handle => $params) {
+            for($n = 0; $n < $params['count']; $n++) {
+                $item = [
+                    'type' => $handle,
+                    'content' => [],
+                ];
+
+                if ($handle == 'paragraph') {
+                    if (!$params['links']) {
+                        $item['content'] = [
+                            [
+                                'type' => 'text',
+                                'text' => fake()->paragraph(rand(2, 5), true),
+                            ]
+                        ];
+                    } else {
+                        $item['content'] = [
+                            [
+                                'type' => 'text',
+                                'text' => fake()->paragraph(rand(2, 5), true).' ',
+                            ],
+                            [
+                                'type' => 'text',
+                                'marks' =>  [
+                                    [
+                                        'type' => 'link',
+                                        'attrs' => [
+                                            'href' => 'https://kraenk.de',
+                                        ] 
+                                    ],
+                                ],
+                                'text' => fake()->words(rand(1, 2), true),
+                            ],
+                            [
+                                'type' => 'text',
+                                'text' => ' '.fake()->paragraph(rand(2, 5), true),
+                            ],
+                        ];
+                        // for ($n = 0; $n < $params['links']; $n++) {
+                        //     $itemContent = [];
+                        //     $itemContent[] = [
+                        //         'type' => 'text',
+                        //         'text' => fake()->paragraph(rand(2, 5), true).' ',
+                        //     ];
+
+                        //     $itemContent[] = [
+                        //         'type' => 'text',
+                        //         'marks' =>  [
+                        //             'type' => 'link',
+                        //             'attrs' => [
+                        //                 'href' => '/test',
+                        //             ] 
+                        //         ],
+                        //         'text' => fake()->words(rand(1, 2), true),
+                        //     ];
+
+                        //     $itemContent[] = [
+                        //         'type' => 'text',
+                        //         'text' => ' '.fake()->paragraph(rand(2, 5), true),
+                        //     ];
+
+                        //     $item['content'] = $itemContent;
+                        // }
+                    }
+                    
+                }
+
+                if ($handle == 'bulletList') {
+                    for ($n = 0; $n < $params['items']; $n++) {
+                        $item['content'][] = [
+                            'type' => 'listItem',
+                            'content' => [[
+                                'type' => 'paragraph',
+                                'content' => [
+                                    [
+                                        'type' => 'text',
+                                        'text' => fake()->paragraph(rand(1, 2), true),
+                                    ]
+                                ]
+                            ]],
+                        ];
+                    }
+                }
+
+                $text[] = $item;
+            }
+        }
+
+        shuffle($text);
+        
+        return $text;
     }
 }
