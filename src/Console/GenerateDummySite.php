@@ -53,6 +53,7 @@ class GenerateDummySite extends Command
     {
         $entry = Entry::make()->collection('pages')->slug('home');
         $entry->set('title', 'Home');
+        $entry->set('is_home', true);
         $entry->set('main_replicator', $this->generateMainContent());
 
         $entry->save();
@@ -63,7 +64,8 @@ class GenerateDummySite extends Command
                 ->locale($site)
                 ->slug('home')
                 ->origin($entry->id());
-
+                
+            $siteEntry->set('is_home', true);
             $siteEntry->save();  
         }
     }
