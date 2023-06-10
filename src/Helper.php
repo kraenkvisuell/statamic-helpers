@@ -3,6 +3,7 @@
 namespace Kraenkvisuell\StatamicHelpers;
 
 use Statamic\Statamic;
+use Statamic\Facades\Form;
 use Statamic\Facades\Site;
 use Statamic\Facades\Term;
 use Illuminate\Support\Str;
@@ -305,6 +306,18 @@ class Helper
         }
         
         return $globals;
+    }
+
+    public function allForms() {
+        $all = Form::all();
+
+        $forms = [];
+
+        foreach($all as $form) {
+            $forms[$form->handle()] = $form;
+        }
+        
+        return $forms;
     }
 
     protected function hydratedTaxonomies(
