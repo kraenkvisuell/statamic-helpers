@@ -314,7 +314,13 @@ class Helper
         $forms = [];
 
         foreach($all as $form) {
-            $forms[$form->handle()] = $form;
+            $fetched = Statamic::tag('form:'.$form->handle())->fetch();
+            
+            
+            $forms[$form->handle()] = [
+                'fields' => $form->fields,
+                'action' => $fetched['attrs']['action'],
+            ];
         }
         
         return $forms;
