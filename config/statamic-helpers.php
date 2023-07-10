@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'with_shop_addon' => false,
     'preset_on_upload' => true,
     'preset_disk' =>'presets',
     'presets' => [

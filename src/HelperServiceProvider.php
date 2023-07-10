@@ -5,6 +5,7 @@ namespace Kraenkvisuell\StatamicHelpers;
 use Statamic\Events\AssetUploaded;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Kraenkvisuell\StatamicHelpers\Console\UploadAll;
 use Kraenkvisuell\StatamicHelpers\Console\DownloadAll;
 use Kraenkvisuell\StatamicHelpers\Console\UploadTrees;
@@ -23,6 +24,8 @@ class HelperServiceProvider extends ServiceProvider
 {
     public function boot()
     {
+        JsonResource::withoutWrapping();
+
         Event::listen(
             AssetUploaded::class,
             [HandleAssetUploads::class, 'handle']

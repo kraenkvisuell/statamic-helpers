@@ -415,7 +415,14 @@ class Helper
             foreach($rawValue as $key => $value) {
                 if (!in_array($key, $this->forbidden)) {
                     if (is_array($value)) {
-                        $cleanedValue[$key] = $this->cleaned($value);
+                        if (config('statamic-helpers.with_shop_addon') && $key == 'linked_product' && isset($value[0])) {
+                            $cleanedValue[$key] = $this->getProductResource($value[0]);
+                        } elseif ($key == 'linked_page' && isset($value[0])) {
+                            $cleanedValue[$key] = $this->entry(id: $value[0]);
+                        } else {
+                            $cleanedValue[$key] = $this->cleaned($value);
+                        }
+
                     } else {
                         if ($key == 'url' && $isAsset && $path && !$value) {
                             $disk = $rawValue['container']['disk'] ?? '';
@@ -453,5 +460,12 @@ class Helper
         }
 
         return $value;
+    }
+
+    public function getProductResource($value): \Kraenkvisuell\Shop\Http\Resources\ProductResource
+    {
+        $product = \Kraenkvisuell\Shop\Models\Product::findOrNew($value);
+
+        return new \Kraenkvisuell\Shop\Http\Resources\ProductResource($product);
     }
 }
