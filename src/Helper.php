@@ -167,7 +167,14 @@ class Helper
 
             foreach ($entry as $rawKey => $rawValue) {
                 if (!in_array($rawKey, $this->forbidden)) {
-                    $cleaned[$rawKey] = $this->cleaned($rawValue);
+                    if (config('statamic-helpers.with_shop_addon') && Str::contains($rawKey, 'linked_product') && isset($rawValue[0])) {
+                        $cleaned[$rawKey] = $this->getProductResource($rawValue[0]);
+                    } elseif (Str::contains($rawKey, 'linked_page') && isset($rawValue[0])) {
+                        $cleaned[$rawKey] = $this->entry(id: $rawValue[0]);
+                    } else {
+                        $cleaned[$rawKey] = $this->cleaned($rawValue);
+                    }
+
                 }
             }
             
@@ -415,9 +422,9 @@ class Helper
             foreach($rawValue as $key => $value) {
                 if (!in_array($key, $this->forbidden)) {
                     if (is_array($value)) {
-                        if (config('statamic-helpers.with_shop_addon') && $key == 'linked_product' && isset($value[0])) {
+                        if (config('statamic-helpers.with_shop_addon') && Str::contains($key, 'linked_product') && isset($value[0])) {
                             $cleanedValue[$key] = $this->getProductResource($value[0]);
-                        } elseif ($key == 'linked_page' && isset($value[0])) {
+                        } elseif (Str::contains($key, 'linked_page') && isset($value[0])) {
                             $cleanedValue[$key] = $this->entry(id: $value[0]);
                         } else {
                             $cleanedValue[$key] = $this->cleaned($value);
