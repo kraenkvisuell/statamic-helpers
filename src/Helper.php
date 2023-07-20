@@ -160,6 +160,10 @@ class Helper
             return [];
         }
 
+        return $this->augmentEntry($entry, $hideInternals, $withChildren);
+    }
+
+    public function augmentEntry($entry, $hideInternals = true, $withChildren = false) {
         $entry = $entry->toArray();
 
         if ($hideInternals) {
@@ -177,7 +181,7 @@ class Helper
 
                 }
             }
-            
+
             $entry = $cleaned;
         }
 

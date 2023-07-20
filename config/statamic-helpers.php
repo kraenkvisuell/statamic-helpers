@@ -3,7 +3,7 @@
 return [
     'with_shop_addon' => false,
     'preset_on_upload' => true,
-    'preset_disk' =>'presets',
+    'preset_disk' => 'presets',
     'presets' => [
         'xs' => ['w' => 100, 'h' => 100, 'q' => 10, 'fit' => 'max'],
         'sm' => ['w' => 300, 'h' => 300, 'q' => 10, 'fit' => 'max'],

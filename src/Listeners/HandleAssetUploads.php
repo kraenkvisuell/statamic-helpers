@@ -1,9 +1,9 @@
 <?php
- 
+
 namespace Kraenkvisuell\StatamicHelpers\Listeners;
 
-use Statamic\Events\AssetUploaded;
 use Kraenkvisuell\StatamicHelpers\Jobs\CreateAssetPresets;
+use Statamic\Events\AssetUploaded;
 
 class HandleAssetUploads
 {

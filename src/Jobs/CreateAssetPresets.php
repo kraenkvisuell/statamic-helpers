@@ -3,11 +3,11 @@
 namespace Kraenkvisuell\StatamicHelpers\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Intervention\Image\Facades\Image;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 use Kraenkvisuell\StatamicHelpers\Facades\Helper;
 
 class CreateAssetPresets implements ShouldQueue
@@ -15,7 +15,7 @@ class CreateAssetPresets implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable;
 
     public $asset;
-    
+
     public function __construct($asset)
     {
         $this->asset = $asset;
@@ -26,9 +26,9 @@ class CreateAssetPresets implements ShouldQueue
         $meta = $this->asset->meta() ?? null;
         $presets = config('statamic-helpers.presets');
         $mimeType = $meta['mime_type'];
-        
+
         if (
-            config('statamic-helpers.preset_on_upload') 
+            config('statamic-helpers.preset_on_upload')
             && $presets
             && (
                 $mimeType == 'image/jpeg'
@@ -39,18 +39,17 @@ class CreateAssetPresets implements ShouldQueue
             $assetDisk = $this->asset->container->disk;
             $assetPath = $this->asset->path;
             $format = $mimeType == 'image/jpeg' ? 'jpg' : 'png';
-            
+
             $url = Helper::asset(path: $assetPath, disk: $assetDisk, useCdn: false);
-            
+
             foreach ($presets as $presetKey => $preset) {
-                
-                
+
                 $img = Image::make($url);
-    
+
                 $width = $preset['w'] ?? null;
                 $height = $preset['h'] ?? null;
                 $quality = $preset['q'] ?? 90;
-                
+
                 if ($width || $height) {
                     $img->resize($width, $height, function ($constraint) {
                         $constraint->aspectRatio();
@@ -59,7 +58,7 @@ class CreateAssetPresets implements ShouldQueue
                 }
 
                 $img->encode($format, $quality);
-                
+
                 Storage::disk($presetDisk)->put($presetKey.'/'.$assetPath, $img, 'public');
             }
         }

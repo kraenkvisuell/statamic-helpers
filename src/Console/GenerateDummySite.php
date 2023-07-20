@@ -2,18 +2,18 @@
 
 namespace Kraenkvisuell\StatamicHelpers\Console;
 
-
-use Statamic\Facades\Nav;
-use Statamic\Facades\Site;
+use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use Statamic\Facades\Entry;
-use Illuminate\Console\Command;
+use Statamic\Facades\Nav;
+use Statamic\Facades\Site;
 
 class GenerateDummySite extends Command
 {
     public $signature = 'kv:dummy-site';
 
     public $pageCount = 30;
+
     public $sites;
 
     public function __construct()
@@ -33,9 +33,9 @@ class GenerateDummySite extends Command
         Nav::findByHandle('main_nav')?->delete();
         Nav::findByHandle('footer_nav')?->delete();
 
-        Entry::query()->where('collection', 'pages')->get()->each->deleteDescendants(); 
+        Entry::query()->where('collection', 'pages')->get()->each->deleteDescendants();
         Entry::query()->where('collection', 'pages')->get()->each->delete();
- 
+
         Entry::query()->where('collection', 'posts')->get()->each->deleteDescendants();
         Entry::query()->where('collection', 'posts')->get()->each->delete();
 
@@ -43,7 +43,7 @@ class GenerateDummySite extends Command
         $this->createPages();
         $this->createMainMenu();
         $this->createFooterMenu();
-        
+
         $this->call('cache:clear');
 
         $this->info('Dummy-Site generiert');
@@ -58,22 +58,22 @@ class GenerateDummySite extends Command
 
         $entry->save();
 
-        foreach($this->sites as $site) {
+        foreach ($this->sites as $site) {
             $siteEntry = Entry::make()
                 ->collection('pages')
                 ->locale($site)
                 ->slug('home')
                 ->origin($entry->id());
-                
+
             $siteEntry->set('is_home', true);
-            $siteEntry->save();  
+            $siteEntry->save();
         }
     }
-    
+
     protected function createPages()
     {
-        
-        for($pageIndex = 0; $pageIndex < $this->pageCount; $pageIndex++) {
+
+        for ($pageIndex = 0; $pageIndex < $this->pageCount; $pageIndex++) {
             $title = ucfirst(fake()->words(rand(2, 3), true));
             $slug = Str::slug($title);
 
@@ -83,14 +83,14 @@ class GenerateDummySite extends Command
 
             $entry->save();
 
-            foreach($this->sites as $site) {
+            foreach ($this->sites as $site) {
                 $siteEntry = Entry::make()
                     ->collection('pages')
                     ->locale($site)
                     ->slug($slug)
                     ->origin($entry->id());
 
-                $siteEntry->save();  
+                $siteEntry->save();
             }
         }
     }
@@ -101,11 +101,11 @@ class GenerateDummySite extends Command
             'default' => [],
         ];
 
-        foreach($this->sites as $site) {
+        foreach ($this->sites as $site) {
             $pagesForNav[$site] = [];
         }
 
-        foreach($this->getPagesForMainMenu() as $pageIndex => $page) {
+        foreach ($this->getPagesForMainMenu() as $pageIndex => $page) {
             $data = [
                 'id' => Str::uuid()->toString(),
             ];
@@ -119,7 +119,7 @@ class GenerateDummySite extends Command
 
             $pagesForNav['default'][] = $data;
 
-            foreach($this->sites as $site) {
+            foreach ($this->sites as $site) {
                 $sitePage = Entry::query()
                     ->where('site', $site)
                     ->where('origin', $page->id())
@@ -146,8 +146,8 @@ class GenerateDummySite extends Command
         $nav->makeTree('default')->save();
 
         $nav->in('default')->tree($pagesForNav['default'])->save();
-        
-        foreach($this->sites as $site) {
+
+        foreach ($this->sites as $site) {
             $nav->makeTree($site)->save();
 
             $nav->in($site)->tree($pagesForNav[$site])->save();
@@ -172,12 +172,12 @@ class GenerateDummySite extends Command
             'default' => [],
         ];
 
-        foreach($this->sites as $site) {
+        foreach ($this->sites as $site) {
             $pagesForNav[$site] = [];
         }
 
         $pageIndex = 0;
-        foreach($this->getPagesForFooterMenu() as $page) {
+        foreach ($this->getPagesForFooterMenu() as $page) {
             $data = [
                 'id' => Str::uuid()->toString(),
                 'entry' => $page->id(),
@@ -186,7 +186,7 @@ class GenerateDummySite extends Command
             if ($pageIndex == 0) {
                 $page->set('title', 'Kontakt')->slug('kontakt');
 
-                foreach(Entry::query()->where('origin', $page->id())->get() as $sitePage) {
+                foreach (Entry::query()->where('origin', $page->id())->get() as $sitePage) {
                     $sitePage->set('title', 'Contact')->slug('contact');
                     $sitePage->save();
                 }
@@ -194,8 +194,8 @@ class GenerateDummySite extends Command
                 $page->save();
             } elseif ($pageIndex == 1) {
                 $page->set('title', 'Impressum')->slug('impressum');
-                
-                foreach(Entry::query()->where('origin', $page->id())->get() as $sitePage) {
+
+                foreach (Entry::query()->where('origin', $page->id())->get() as $sitePage) {
                     $sitePage->set('title', 'Imprint')->slug('imprint');
                     $sitePage->save();
                 }
@@ -204,7 +204,7 @@ class GenerateDummySite extends Command
             } elseif ($pageIndex == 2) {
                 $page->set('title', 'Datenschutz')->slug('datenschutz');
 
-                foreach(Entry::query()->where('origin', $page->id())->get() as $sitePage) {
+                foreach (Entry::query()->where('origin', $page->id())->get() as $sitePage) {
                     $sitePage->set('title', 'Privacy Policy')->slug('privacy-policy');
                     $sitePage->save();
                 }
@@ -214,7 +214,7 @@ class GenerateDummySite extends Command
 
             $pagesForNav['default'][] = $data;
 
-            foreach($this->sites as $site) {
+            foreach ($this->sites as $site) {
                 $sitePage = Entry::query()
                     ->where('site', $site)
                     ->where('origin', $page->id())
@@ -239,8 +239,8 @@ class GenerateDummySite extends Command
         $nav->makeTree('default')->save();
 
         $nav->in('default')->tree($pagesForNav['default'])->save();
-        
-        foreach($this->sites as $site) {
+
+        foreach ($this->sites as $site) {
             $nav->makeTree($site)->save();
 
             $nav->in($site)->tree($pagesForNav[$site])->save();
@@ -260,7 +260,7 @@ class GenerateDummySite extends Command
 
         return $query->get()
             ->slice($slice, 3)
-            ->map(function($page) {
+            ->map(function ($page) {
                 return [
                     'id' => Str::uuid()->toString(),
                     'entry' => $page->id(),
@@ -296,7 +296,7 @@ class GenerateDummySite extends Command
         $content = [];
 
         foreach ($elements as $handle => $params) {
-            for($n = 0; $n < $params['count']; $n++) {
+            for ($n = 0; $n < $params['count']; $n++) {
                 $item = [
                     'id' => Str::random(8),
                     'enabled' => true,
@@ -375,10 +375,10 @@ class GenerateDummySite extends Command
                 'width' => 16,
                 'height' => 9,
                 'code' => '<iframe width="560" height="315" src="https://www.youtube.com/embed/iTxOKsyZ0Lw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>',
-            ]
+            ],
         ];
 
-        return $codes[rand(0, count($codes)-1)];
+        return $codes[rand(0, count($codes) - 1)];
     }
 
     protected function dummyText()
@@ -397,19 +397,19 @@ class GenerateDummySite extends Command
         ];
 
         foreach ($elements as $handle => $params) {
-            for($n = 0; $n < $params['count']; $n++) {
+            for ($n = 0; $n < $params['count']; $n++) {
                 $item = [
                     'type' => $handle,
                     'content' => [],
                 ];
 
                 if ($handle == 'paragraph') {
-                    if (!$params['links']) {
+                    if (! $params['links']) {
                         $item['content'] = [
                             [
                                 'type' => 'text',
                                 'text' => fake()->paragraph(rand(2, 5), true),
-                            ]
+                            ],
                         ];
                     } else {
                         $item['content'] = [
@@ -419,12 +419,12 @@ class GenerateDummySite extends Command
                             ],
                             [
                                 'type' => 'text',
-                                'marks' =>  [
+                                'marks' => [
                                     [
                                         'type' => 'link',
                                         'attrs' => [
                                             'href' => 'https://kraenk.de',
-                                        ] 
+                                        ],
                                     ],
                                 ],
                                 'text' => fake()->words(rand(1, 2), true),
@@ -447,7 +447,7 @@ class GenerateDummySite extends Command
                         //             'type' => 'link',
                         //             'attrs' => [
                         //                 'href' => '/test',
-                        //             ] 
+                        //             ]
                         //         ],
                         //         'text' => fake()->words(rand(1, 2), true),
                         //     ];
@@ -460,7 +460,7 @@ class GenerateDummySite extends Command
                         //     $item['content'] = $itemContent;
                         // }
                     }
-                    
+
                 }
 
                 if ($handle == 'bulletList') {
@@ -473,8 +473,8 @@ class GenerateDummySite extends Command
                                     [
                                         'type' => 'text',
                                         'text' => fake()->paragraph(rand(1, 2), true),
-                                    ]
-                                ]
+                                    ],
+                                ],
                             ]],
                         ];
                     }
@@ -485,7 +485,7 @@ class GenerateDummySite extends Command
         }
 
         shuffle($text);
-        
+
         return $text;
     }
 }

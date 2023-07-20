@@ -2,9 +2,9 @@
 
 namespace Kraenkvisuell\StatamicHelpers\Console;
 
-use Statamic\Facades\Asset;
 use Illuminate\Console\Command;
 use Kraenkvisuell\StatamicHelpers\Jobs\CreateAssetPresets;
+use Statamic\Facades\Asset;
 
 class RecreateAllPresets extends Command
 {
