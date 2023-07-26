@@ -71,13 +71,11 @@ class Helper
             
             foreach ($entry->toArray() as $rawKey => $rawValue) {
                 if (!in_array($rawKey, $this->forbidden)) {
-                    
                     if ($taxonomy = Taxonomy::findByHandle($rawKey)) {
                         $cleaned[$rawKey] = $this->hydratedTaxonomies($rawKey, $rawValue);
                     } else {
                         $cleaned[$rawKey] = $this->cleaned($rawValue);
                     }
-                    
                 }
             }
             
@@ -165,10 +163,8 @@ class Helper
 
     public function augmentEntry($entry, $hideInternals = true, $withChildren = false) {
         $entry = $entry->toArray();
-
         if ($hideInternals) {
             $cleaned = [];
-
             foreach ($entry as $rawKey => $rawValue) {
                 if (!in_array($rawKey, $this->forbidden)) {
                     if (config('statamic-helpers.with_shop_addon') && Str::contains($rawKey, 'linked_product') && isset($rawValue[0])) {
@@ -178,7 +174,6 @@ class Helper
                     } else {
                         $cleaned[$rawKey] = $this->cleaned($rawValue);
                     }
-
                 }
             }
 
@@ -352,7 +347,18 @@ class Helper
             });
 
         return $taxonomies;
-    }   
+    }
+
+    protected function checkIfTaxonomies($list = []) {
+        $handles = Taxonomy::handles();
+        foreach($handles as $handle) {
+            if($taxonomies = $this->hydratedTaxonomies($handle, $list)) {
+                return $taxonomies;
+            }
+        }
+
+        return null;
+    }
 
     public function generatePresets($rawValue, $originalUrl) {
         $presets = [];
@@ -417,8 +423,7 @@ class Helper
     {
         $cleanedValue = $rawValue;
 
-        if (is_array($rawValue)) {
-           
+         if (is_array($rawValue)) {
 
             $cleanedValue = [];
             $isAsset = $rawValue['is_asset'] ?? false;
@@ -426,7 +431,15 @@ class Helper
             foreach($rawValue as $key => $value) {
                 if (!in_array($key, $this->forbidden)) {
                     if (is_array($value)) {
-                        if (config('statamic-helpers.with_shop_addon') && Str::contains($key, 'linked_product') && isset($value[0])) {
+
+                        if (
+                            array_is_list($value)
+                            && isset($value[0])
+                            && is_string($value[0])
+                            && $taxonomies = $this->checkIfTaxonomies($value)
+                        ) {
+                            $cleanedValue[$key] = $taxonomies;
+                        } elseif (config('statamic-helpers.with_shop_addon') && Str::contains($key, 'linked_product') && isset($value[0])) {
                             $cleanedValue[$key] = $this->getProductResource($value[0]);
                         } elseif (Str::contains($key, 'linked_page') && isset($value[0])) {
                             $cleanedValue[$key] = $this->entry(id: $value[0]);
