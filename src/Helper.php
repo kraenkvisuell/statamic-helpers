@@ -3,15 +3,16 @@
 namespace Kraenkvisuell\StatamicHelpers;
 
 use Exception;
-use Statamic\Statamic;
-use Statamic\Facades\Form;
-use Statamic\Facades\Site;
-use Statamic\Facades\Term;
+use Statamic\Facades\Nav;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Statamic\Facades\Entry;
-use Statamic\Facades\Taxonomy;
+use Statamic\Facades\Form;
 use Statamic\Facades\GlobalSet;
-use Illuminate\Support\Facades\Storage;
+use Statamic\Facades\Site;
+use Statamic\Facades\Taxonomy;
+use Statamic\Facades\Term;
+use Statamic\Statamic;
 
 class Helper
 {
@@ -39,8 +40,7 @@ class Helper
         bool $hideInternals = true,
         $orderBy = '',
         $orderDirection = 'asc',
-    )
-    {
+    ) {
         $site = $site ?: Site::current()->handle();
 
         $query = Entry::query()
@@ -58,11 +58,11 @@ class Helper
 
         $entries = $query->get();
 
-        if (!$entries) {
+        if (! $entries) {
             return [];
         }
 
-        if (!$hideInternals) {
+        if (! $hideInternals) {
             return $entries;
         }
 
@@ -72,7 +72,7 @@ class Helper
             $cleaned = [];
 
             foreach ($entry->toArray() as $rawKey => $rawValue) {
-                if (!in_array($rawKey, $this->forbidden)) {
+                if (! in_array($rawKey, $this->forbidden)) {
                     if ($taxonomy = Taxonomy::findByHandle($rawKey)) {
                         $cleaned[$rawKey] = $this->hydratedTaxonomies($rawKey, $rawValue);
                     } else {
@@ -84,7 +84,7 @@ class Helper
             $cleanedEntries[] = $cleaned;
         }
 
-        $nav = Statamic::tag('nav:collection:' . $collection)->fetch();
+        $nav = Statamic::tag('nav:collection:'.$collection)->fetch();
 
         if ($nav) {
             $sortedEntries = [];
@@ -96,7 +96,6 @@ class Helper
 
             return $sortedEntries;
         }
-
 
         return $cleanedEntries;
     }
@@ -112,8 +111,7 @@ class Helper
         $withChildren = false,
         $flat = false,
         $isHome = false,
-    )
-    {
+    ) {
         $site = $site ?: Site::current()->handle();
 
         if ($id) {
@@ -156,7 +154,7 @@ class Helper
             }
         }
 
-        if (!$entry) {
+        if (! $entry) {
             return [];
         }
 
@@ -169,7 +167,7 @@ class Helper
         if ($hideInternals) {
             $cleaned = [];
             foreach ($entry as $rawKey => $rawValue) {
-                if (!in_array($rawKey, $this->forbidden)) {
+                if (! in_array($rawKey, $this->forbidden)) {
                     if (config('statamic-helpers.with_shop_addon') && Str::contains($rawKey, 'linked_product') && isset($rawValue[0])) {
                         $cleaned[$rawKey] = $this->getProductResource($rawValue[0]);
                     } elseif (Str::contains($rawKey, 'linked_page') && isset($rawValue[0])) {
@@ -193,9 +191,9 @@ class Helper
     public function childrenOf($entry)
     {
         $children = [];
-        $nav = Statamic::tag('nav:collection:' . $entry['collection']['handle'])
+        $nav = Statamic::tag('nav:collection:'.$entry['collection']['handle'])
             ->params([
-                'from' => $entry['url']
+                'from' => $entry['url'],
             ])
             ->fetch();
 
@@ -214,8 +212,7 @@ class Helper
         $slug = '',
         $maxDepth = 0,
         $select = []
-    )
-    {
+    ) {
         $select = array_unique(
             array_merge(['title', 'is_current', 'url', 'id', 'entry_id'], $select)
         );
@@ -230,37 +227,23 @@ class Helper
             $params['max_depth'] = $maxDepth;
         }
 
-        $nav = Statamic::tag('nav:' . $slug)
+        $nav = Statamic::tag('nav:'.$slug)
             ->params($params)
             ->fetch();
 
         return $nav;
     }
 
-    public function allNavs(
-        $select = []
-    )
-    {
+    public function allNavs($select = []) {
         $navs = [];
-
-        $navigationFiles = scandir(base_path('content/navigation')) ?: [];
-        foreach ($navigationFiles as $navigationFile) {
-            if (!Str::startsWith($navigationFile, '.') && Str::endsWith($navigationFile, '.yaml')) {
-                $handle = Str::beforeLast($navigationFile, '.');
-                $navs[$handle] = $this->nav(slug: $handle, select: $select);
-            }
-        }
-
-        if (!is_dir(base_path('content/trees/collections'))) {
-            return $navs;
-        }
-
         $navs['collection'] = [];
-        $collectionFiles = scandir(base_path('content/trees/collections')) ?: [];
-        foreach ($collectionFiles as $collectionFile) {
-            if (!Str::startsWith($collectionFile, '.') && Str::endsWith($collectionFile, '.yaml')) {
-                $handle = Str::beforeLast($collectionFile, '.');
-                $navs['collection'][$handle] = $this->nav(slug: 'collection:' . $handle, select: $select);
+
+        foreach(Nav::all() as $navTag) {
+            $handle = $navTag->handle;
+            if ($navTag->collection) {
+                $navs['collection'][$handle] = $this->nav(slug: 'collection:'.$handle, select: $select);
+            } else {
+                $navs[$handle] = $this->nav(slug: $handle, select: $select);
             }
         }
 
@@ -270,8 +253,7 @@ class Helper
     public function global(
         $key = '',
         $site = ''
-    )
-    {
+    ) {
         $site = $site ?: Site::current()->handle();
 
         $keyArr = explode(':', $key);
@@ -290,8 +272,7 @@ class Helper
     public function globals(
         $handle = '',
         $site = ''
-    )
-    {
+    ) {
         $site = $site ?: Site::current()->handle();
 
         $raw = GlobalSet::findByHandle($handle)
@@ -301,7 +282,7 @@ class Helper
         $cleaned = [];
 
         foreach ($raw as $rawKey => $rawValue) {
-            if (!in_array($rawKey, $this->forbidden)) {
+            if (! in_array($rawKey, $this->forbidden)) {
                 $cleaned[$rawKey] = $this->cleaned($rawValue);
             }
         }
@@ -330,8 +311,7 @@ class Helper
         $forms = [];
 
         foreach ($all as $form) {
-            $fetched = Statamic::tag('form:' . $form->handle())->fetch();
-
+            $fetched = Statamic::tag('form:'.$form->handle())->fetch();
 
             $forms[$form->handle()] = [
                 'fields' => $form->fields,
@@ -345,8 +325,7 @@ class Helper
     protected function hydratedTaxonomies(
         $handle = '',
         $slugs = []
-    )
-    {
+    ) {
         $taxonomies = Term::query()
             ->where('taxonomy', $handle)
             ->get()
@@ -376,7 +355,7 @@ class Helper
     {
         if (count($list) === 1 && is_string($list[0])) {
             try {
-                if ($form = Statamic::tag('form:' . $list[0])->fetch()) {
+                if ($form = Statamic::tag('form:'.$list[0])->fetch()) {
                     return $form;
                 }
             } catch (Exception $e) {
@@ -393,14 +372,14 @@ class Helper
 
         $presetDisk = config('statamic-helpers.preset_disk') ?: 'presets';
 
-        $cdn = config('filesystems.disks.' . $presetDisk . '.cdn');
-        $root = config('filesystems.disks.' . $presetDisk . '.root');
+        $cdn = config('filesystems.disks.'.$presetDisk.'.cdn');
+        $root = config('filesystems.disks.'.$presetDisk.'.root');
 
         foreach (config('statamic-helpers.presets') ?: [] as $presetKey => $preset) {
             if ($rawValue['mime_type'] != 'image/jpeg' && $rawValue['mime_type'] != 'image/png') {
                 $presets[$presetKey] = $originalUrl;
             } elseif ($cdn) {
-                $presets[$presetKey] = $cdn . '/' . ($root ? $root . '/' : '') . $presetKey . '/' . $rawValue['path'];
+                $presets[$presetKey] = $cdn.'/'.($root ? $root.'/' : '').$presetKey.'/'.$rawValue['path'];
             } else {
                 $presets[$presetKey] = Storage::disk($presetDisk)->url($rawValue['path']);
             }
@@ -413,19 +392,18 @@ class Helper
         $path = '',
         $disk = '',
         $useCdn = true,
-    )
-    {
+    ) {
         if (stristr($path, '::')) {
             $disk = $disk ?: Str::beforeLast($path, '::');
             $path = Str::afterLast($path, '::');
         }
         $disk = $disk ?: 'assets';
 
-        $cdn = config('filesystems.disks.' . $disk . '.cdn');
-        $root = config('filesystems.disks.' . $disk . '.root');
+        $cdn = config('filesystems.disks.'.$disk.'.cdn');
+        $root = config('filesystems.disks.'.$disk.'.root');
 
         if ($useCdn && $cdn) {
-            return $cdn . '/' . ($root ? $root . '/' : '') . $path;
+            return $cdn.'/'.($root ? $root.'/' : '').$path;
         }
 
         return Storage::disk($disk)->url($path);
@@ -434,8 +412,7 @@ class Helper
     public function glide(
         $path = '',
         $disk = ''
-    )
-    {
+    ) {
         $url = $this->asset($path, $disk);
 
         $images = Statamic::tag('glide:generate')
@@ -459,7 +436,7 @@ class Helper
             $isAsset = $rawValue['is_asset'] ?? false;
             $path = $rawValue['path'] ?? '';
             foreach ($rawValue as $key => $value) {
-                if (!in_array($key, $this->forbidden)) {
+                if (! in_array($key, $this->forbidden)) {
                     if (is_array($value)) {
 
                         if (
@@ -482,7 +459,7 @@ class Helper
                         }
 
                     } else {
-                        if ($key == 'url' && $isAsset && $path && !$value) {
+                        if ($key == 'url' && $isAsset && $path && ! $value) {
                             $disk = $rawValue['container']['disk'] ?? '';
                             $cleanedValue[$key] = Helper::asset($path, $disk);
                             $cleanedValue['presets'] = $this->generatePresets($rawValue, $cleanedValue[$key]);
@@ -503,7 +480,7 @@ class Helper
             is_string($value)
             && $key != 'url'
             && $key != 'id'
-            && !stristr($key, '_id')
+            && ! stristr($key, '_id')
             && strlen($value) > 9
             && Str::substrCount($value, '-', 2) == 4
         ) {
