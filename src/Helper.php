@@ -473,12 +473,12 @@ class Helper
                                 $cleanedValue[$key] = $taxonomies;
                             } elseif (stristr($key, 'form') && $form = $this->checkIfForm($value)) {
                                 $cleanedValue[$key] = $form;
+                            } elseif (Str::contains($key, 'linked_page') && isset($value[0])) {
+                                $cleanedValue[$key] = $this->entry(id: $value[0]);
                             }
 
                         } elseif (config('statamic-helpers.with_shop_addon') && Str::contains($key, 'linked_product') && isset($value[0])) {
                             $cleanedValue[$key] = $this->getProductResource($value[0]);
-                        } elseif (Str::contains($key, 'linked_page') && isset($value[0])) {
-                            $cleanedValue[$key] = $this->entry(id: $value[0]);
                         } else {
                             $cleanedValue[$key] = $this->cleaned($value);
                         }
