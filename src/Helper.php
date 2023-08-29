@@ -3,12 +3,12 @@
 namespace Kraenkvisuell\StatamicHelpers;
 
 use Exception;
-use Statamic\Facades\Nav;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Form;
 use Statamic\Facades\GlobalSet;
+use Statamic\Facades\Nav;
 use Statamic\Facades\Site;
 use Statamic\Facades\Taxonomy;
 use Statamic\Facades\Term;
@@ -27,6 +27,9 @@ class Helper
         'published',
         'updated_by',
     ];
+
+    public $cachedTaxonomies = [];
+    public $cachedTerms = [];
 
     public function isPreview()
     {
@@ -75,6 +78,7 @@ class Helper
                 if (! in_array($rawKey, $this->forbidden)) {
                     if ($taxonomy = Taxonomy::findByHandle($rawKey)) {
                         $cleaned[$rawKey] = $this->hydratedTaxonomies($rawKey, $rawValue);
+
                     } else {
                         $cleaned[$rawKey] = $this->cleaned($rawValue);
                     }
@@ -164,6 +168,7 @@ class Helper
     public function augmentEntry($entry, $hideInternals = true, $withChildren = false)
     {
         $entry = $entry->toArray();
+
         if ($hideInternals) {
             $cleaned = [];
             foreach ($entry as $rawKey => $rawValue) {
@@ -177,7 +182,6 @@ class Helper
                     }
                 }
             }
-
             $entry = $cleaned;
         }
 
@@ -234,11 +238,12 @@ class Helper
         return $nav;
     }
 
-    public function allNavs($select = []) {
+    public function allNavs($select = [])
+    {
         $navs = [];
         $navs['collection'] = [];
 
-        foreach(Nav::all() as $navTag) {
+        foreach (Nav::all() as $navTag) {
             $handle = $navTag->handle;
             if ($navTag->collection) {
                 $navs['collection'][$handle] = $this->nav(slug: 'collection:'.$handle, select: $select);
@@ -326,17 +331,37 @@ class Helper
         $handle = '',
         $slugs = []
     ) {
+        sort($slugs);
+        $cacheKey = $handle.'_'.implode('_', $slugs);
+
+        if (isset($this->cachedTaxonomies[$cacheKey])) {
+            return $this->cachedTaxonomies[$cacheKey];
+        }
+
         $taxonomies = Term::query()
             ->where('taxonomy', $handle)
             ->get()
             ->filter(function ($term) use ($slugs) {
                 return in_array($term->slug(), $slugs);
             })
-            ->map(function ($term) {
-                return $term->toArray();
+            ->map(function ($term, $handle) {
+                $cacheKey = $handle.'_'.$term->slug();
+                if (!isset($this->cachedTerms[$cacheKey])) {
+                    $term = $term->toArray();
+
+                    $this->cachedTerms[$cacheKey] = [
+                        'id' => $term['id'],
+                        'slug' => $term['slug'],
+                        'title' => $term['title'],
+                    ];
+                }
+
+                return $this->cachedTerms[$cacheKey];
             });
 
-        return $taxonomies;
+        $this->cachedTaxonomies[$cacheKey] = $taxonomies->toArray();
+
+        return $this->cachedTaxonomies[$cacheKey];
     }
 
     protected function checkIfTaxonomies($list = [])
