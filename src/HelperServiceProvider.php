@@ -17,7 +17,16 @@ use Kraenkvisuell\StatamicHelpers\Console\UploadCollections;
 use Kraenkvisuell\StatamicHelpers\Console\UploadGlobals;
 use Kraenkvisuell\StatamicHelpers\Console\UploadTrees;
 use Kraenkvisuell\StatamicHelpers\Listeners\HandleAssetUploads;
+use Kraenkvisuell\StatamicHelpers\Listeners\RefreshEntryCache;
+use Kraenkvisuell\StatamicHelpers\Listeners\RefreshGlobalCache;
+use Kraenkvisuell\StatamicHelpers\Listeners\RefreshNavCache;
+use Kraenkvisuell\StatamicHelpers\Listeners\RemoveFromEntryCache;
 use Statamic\Events\AssetUploaded;
+use Statamic\Events\EntryDeleted;
+use Statamic\Events\EntrySaved;
+use Statamic\Events\GlobalSetSaved;
+use Statamic\Events\NavSaved;
+use Statamic\Events\NavTreeSaved;
 
 class HelperServiceProvider extends ServiceProvider
 {
@@ -28,6 +37,31 @@ class HelperServiceProvider extends ServiceProvider
             AssetUploaded::class,
             [HandleAssetUploads::class, 'handle']
         );
+
+        Event::listen(
+            EntrySaved::class,
+            [RefreshEntryCache::class, 'handle']
+        );
+
+        Event::listen(
+            EntryDeleted::class,
+            [RemoveFromEntryCache::class, 'handle']
+        );
+
+        Event::listen(
+            GlobalSetSaved::class,
+            [RefreshGlobalCache::class, 'handle']
+        );
+
+        Event::listen(
+            [NavSaved::class, NavTreeSaved::class],
+            [RefreshNavCache::class, 'handle']
+        );
+
+        //        Event::listen(
+        //            NavTreeSaved::class,
+        //            [RefreshNavCache::class, 'handle']
+        //        );
 
         $this->publishes([
             __DIR__.'/../config/statamic-helpers.php' => config_path('statamic-helpers.php'),

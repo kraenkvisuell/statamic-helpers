@@ -3,6 +3,7 @@
 namespace Kraenkvisuell\StatamicHelpers;
 
 use Exception;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Statamic\Facades\Entry;
@@ -29,6 +30,7 @@ class Helper
     ];
 
     public $cachedTaxonomies = [];
+
     public $cachedTerms = [];
 
     public function isPreview()
@@ -102,6 +104,13 @@ class Helper
         }
 
         return $cleanedEntries;
+    }
+
+    public function cachedEntry($collection = 'pages', $slug = 'home')
+    {
+        return Cache::rememberForever($collection.'.'.$slug, function () use ($collection, $slug) {
+            return $this->entry(collection: $collection, slug: $slug);
+        });
     }
 
     public function entry(
@@ -255,6 +264,13 @@ class Helper
         return $navs;
     }
 
+    public function cachedAllNavs($language = 'default')
+    {
+        return Cache::rememberForever('all_navs.'.$language, function () {
+            return $this->allNavs();
+        });
+    }
+
     public function global(
         $key = '',
         $site = ''
@@ -309,6 +325,15 @@ class Helper
         return $globals;
     }
 
+    public function cachedAllGlobals($language = 'default', $site = '')
+    {
+        $site = $site ?: Site::current()->handle();
+
+        return Cache::rememberForever('all_globals.'.$language.'.'.$site, function () use ($site) {
+            return $this->allGlobals(site: $site);
+        });
+    }
+
     public function allForms()
     {
         $all = Form::all();
@@ -346,7 +371,7 @@ class Helper
             })
             ->map(function ($term, $handle) {
                 $cacheKey = $handle.'_'.$term->slug();
-                if (!isset($this->cachedTerms[$cacheKey])) {
+                if (! isset($this->cachedTerms[$cacheKey])) {
                     $term = $term->toArray();
 
                     $this->cachedTerms[$cacheKey] = [
