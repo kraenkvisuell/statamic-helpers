@@ -9,13 +9,12 @@ class RefreshEntryCache
 {
     public function handle(object $event): void
     {
-        if ($event?->entry?->collection?->handle === 'pages') {
-            $slug = $event->entry->slug;
-            Cache::forget('page.'.$slug);
+        $slug = $event->entry->slug;
+        $key = $event?->entry?->collection?->handle.'.'.$slug.'.'.app()->getLocale();
+        Cache::forget($key);
 
-            Cache::rememberForever('page.'.$slug, function () use ($slug) {
-                return Helper::entry(slug: $slug);
-            });
-        }
+        Cache::rememberForever($key, function () use ($slug) {
+            return Helper::entry(slug: $slug);
+        });
     }
 }

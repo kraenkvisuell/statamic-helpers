@@ -108,7 +108,9 @@ class Helper
 
     public function cachedEntry($collection = 'pages', $slug = 'home')
     {
-        return Cache::rememberForever($collection.'.'.$slug, function () use ($collection, $slug) {
+        $key = $collection.'.'.$slug.'.'.app()->getLocale();
+
+        return Cache::rememberForever($key, function () use ($collection, $slug) {
             return $this->entry(collection: $collection, slug: $slug);
         });
     }

@@ -10,8 +10,11 @@ class RefreshNavCache
     public function handle(object $event): void
     {
         $languages = config('translatable.languages') ?: ['default' => []];
+        $currentLocale = app()->getLocale();
 
         foreach ($languages as $language => $languageParams) {
+            app()->setLocale($language);
+
             Cache::forget('all_navs.'.$language);
 
             Cache::rememberForever('all_navs.'.$language, function () {
@@ -19,6 +22,6 @@ class RefreshNavCache
             });
         }
 
-        ray('nav cached');
+        app()->setLocale($currentLocale);
     }
 }

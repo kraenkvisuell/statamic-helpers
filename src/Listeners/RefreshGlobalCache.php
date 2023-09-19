@@ -11,9 +11,11 @@ class RefreshGlobalCache
     {
         $languages = config('translatable.languages') ?: ['default' => []];
         $sites = config('statamic.sites.sites');
-        //$handle = $event->globals?->handle();
+        $currentLocale = app()->getLocale();
 
         foreach ($languages as $language => $languageParams) {
+            app()->setLocale($language);
+
             foreach ($sites as $site => $siteParams) {
                 Cache::forget('all_globals.'.$language.'.'.$site);
 
@@ -22,5 +24,7 @@ class RefreshGlobalCache
                 });
             }
         }
+
+        app()->setLocale($currentLocale);
     }
 }
