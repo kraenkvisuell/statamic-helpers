@@ -229,7 +229,7 @@ class Helper
         $select = []
     ) {
         $select = array_unique(
-            array_merge(['title', 'is_current', 'url', 'id', 'entry_id'], $select)
+            array_merge(['title', 'slug', 'is_current', 'url', 'id', 'entry_id'], $select)
         );
 
         $slug = trim($slug);

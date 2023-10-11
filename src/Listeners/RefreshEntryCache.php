@@ -10,11 +10,23 @@ class RefreshEntryCache
     public function handle(object $event): void
     {
         $slug = $event->entry->slug;
-        $key = $event?->entry?->collection?->handle.'.'.$slug.'.'.app()->getLocale();
-        Cache::forget($key);
+        $collection = $event->entry->collection->handle;
 
-        Cache::rememberForever($key, function () use ($slug) {
-            return Helper::entry(slug: $slug);
-        });
+        $languages = config('translatable.languages') ?: ['default' => []];
+        $currentLocale = app()->getLocale();
+
+        foreach ($languages as $language => $languageParams) {
+            app()->setLocale($language);
+
+            $key = $collection.'.'.$slug.'.'.$language;
+
+            Cache::forget($key);
+
+            Cache::rememberForever($key, function () use ($slug, $collection) {
+                return Helper::entry(collection: $collection, slug: $slug);
+            });
+        }
+
+        app()->setLocale($currentLocale);
     }
 }
