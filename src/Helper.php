@@ -229,7 +229,6 @@ class Helper
         $maxDepth = 0,
         $select = []
     ) {
-
         $select = array_unique(
             array_merge(['title', 'slug', 'is_current', 'url', 'id', 'entry_id'], $select)
         );
