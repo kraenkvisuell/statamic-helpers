@@ -262,7 +262,11 @@ class Helper
 
         foreach (Nav::all() as $navTag) {
             $handle = $navTag->handle;
-            $navs[$handle] = $this->nav(slug: $handle, select: $select);
+            if ($navTag->collection && ! isset($navs['collection'][$handle])) {
+                $navs['collection'][$handle] = $this->nav(slug: 'collection:'.$handle, select: $select);
+            } else {
+                $navs[$handle] = $this->nav(slug: $handle, select: $select);
+            }
         }
 
         return $navs;
