@@ -225,10 +225,11 @@ class Helper
     }
 
     public function nav(
-        $slug = '',
+        $slug = 'bar',
         $maxDepth = 0,
         $select = []
     ) {
+
         $select = array_unique(
             array_merge(['title', 'slug', 'is_current', 'url', 'id', 'entry_id'], $select)
         );
@@ -242,6 +243,8 @@ class Helper
         if ($maxDepth) {
             $params['max_depth'] = $maxDepth;
         }
+
+
 
         $nav = Statamic::tag('nav:'.$slug)
             ->params($params)
@@ -257,12 +260,7 @@ class Helper
 
         foreach (Structure::all() as $navTag) {
             $handle = $navTag->handle;
-
-            if ($navTag->collection) {
-                $navs['collection'][$handle] = $this->nav(slug: 'collection:'.$handle, select: $select);
-            } else {
-                $navs[$handle] = $this->nav(slug: $handle, select: $select);
-            }
+            $navs['collection'][$handle] = $this->nav(slug: 'collection:'.$handle, select: $select);
         }
 
         return $navs;
