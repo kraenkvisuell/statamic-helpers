@@ -244,8 +244,6 @@ class Helper
             $params['max_depth'] = $maxDepth;
         }
 
-
-
         $nav = Statamic::tag('nav:'.$slug)
             ->params($params)
             ->fetch();
@@ -260,7 +258,12 @@ class Helper
 
         foreach (Structure::all() as $navTag) {
             $handle = $navTag->handle;
-            $navs['collection'][$handle] = $this->nav(slug: 'collection:'.$handle, select: $select);
+
+            if(stristr(get_class($navTag), 'CollectionStructure')) {
+                $navs['collection'][$handle] = $this->nav(slug: 'collection:'.$handle, select: $select);
+            } else {
+                $navs[$handle] = $this->nav(slug: $handle, select: $select);
+            }
         }
 
         return $navs;
