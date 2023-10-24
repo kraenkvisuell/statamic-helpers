@@ -3,7 +3,6 @@
 namespace Kraenkvisuell\StatamicHelpers;
 
 use Exception;
-use Statamic\Facades\Structure;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -12,6 +11,7 @@ use Statamic\Facades\Form;
 use Statamic\Facades\GlobalSet;
 use Statamic\Facades\Nav;
 use Statamic\Facades\Site;
+use Statamic\Facades\Structure;
 use Statamic\Facades\Taxonomy;
 use Statamic\Facades\Term;
 use Statamic\Statamic;
@@ -257,12 +257,8 @@ class Helper
 
         foreach (Structure::all() as $navTag) {
             $handle = $navTag->handle;
-            $navs['collection'][$handle] = $this->nav(slug: 'collection:'.$handle, select: $select);
-        }
 
-        foreach (Nav::all() as $navTag) {
-            $handle = $navTag->handle;
-            if ($navTag->collection && ! isset($navs['collection'][$handle])) {
+            if ($navTag->collection) {
                 $navs['collection'][$handle] = $this->nav(slug: 'collection:'.$handle, select: $select);
             } else {
                 $navs[$handle] = $this->nav(slug: $handle, select: $select);
