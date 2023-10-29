@@ -551,10 +551,10 @@ class Helper
         return $value;
     }
 
-    public function getProductResource($value): \Kraenkvisuell\Shop\Http\Resources\ProductResource
+    public function getProductResource($value): \App\Http\Resources\ProductResource
     {
-        $product = \Kraenkvisuell\Shop\Models\Product::findOrNew($value);
+        $product = \App\Models\Product::findOrNew($value);
 
-        return new \Kraenkvisuell\Shop\Http\Resources\ProductResource($product);
+        return new \App\Http\Resources\ProductResource($product);
     }
 }
