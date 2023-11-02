@@ -9,7 +9,6 @@ use Illuminate\Support\Str;
 use Statamic\Facades\Entry;
 use Statamic\Facades\Form;
 use Statamic\Facades\GlobalSet;
-use Statamic\Facades\Nav;
 use Statamic\Facades\Site;
 use Statamic\Facades\Structure;
 use Statamic\Facades\Taxonomy;
@@ -59,6 +58,10 @@ class Helper
         }
 
         if ($select) {
+            $select = array_merge(
+                ['collection', 'blueprint', 'is_entry'],
+                $select
+            );
             $query->select($select);
         }
 
@@ -111,6 +114,7 @@ class Helper
     {
         $key = $collection.'.'.$slug.'.'.app()->getLocale();
 
+        //Cache::forget($key);
         return Cache::rememberForever($key, function () use ($collection, $slug) {
             return $this->entry(collection: $collection, slug: $slug);
         });
@@ -258,7 +262,7 @@ class Helper
         foreach (Structure::all() as $navTag) {
             $handle = $navTag->handle;
 
-            if(stristr(get_class($navTag), 'CollectionStructure')) {
+            if (stristr(get_class($navTag), 'CollectionStructure')) {
                 $navs['collection'][$handle] = $this->nav(slug: 'collection:'.$handle, select: $select);
             } else {
                 $navs[$handle] = $this->nav(slug: $handle, select: $select);
@@ -333,6 +337,7 @@ class Helper
     {
         $site = $site ?: Site::current()->handle();
 
+        //Cache::forget('all_globals.'.$language.'.'.$site);
         return Cache::rememberForever('all_globals.'.$language.'.'.$site, function () use ($site) {
             return $this->allGlobals(site: $site);
         });
@@ -553,7 +558,7 @@ class Helper
 
     public function getProductResource($value): \App\Http\Resources\ProductResource
     {
-        $product = \App\Models\Product::findOrNew($value);
+        $product = \App\Models\Product::with('skus.colors')->findOrNew($value);
 
         return new \App\Http\Resources\ProductResource($product);
     }
