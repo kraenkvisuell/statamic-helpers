@@ -114,7 +114,8 @@ class Helper
     {
         $key = $collection.'.'.$slug.'.'.app()->getLocale();
 
-        //Cache::forget($key);
+        Cache::forget($key);
+
         return Cache::rememberForever($key, function () use ($collection, $slug) {
             return $this->entry(collection: $collection, slug: $slug);
         });
@@ -183,19 +184,21 @@ class Helper
 
     public function augmentEntry($entry, $hideInternals = true, $withChildren = false)
     {
-        $entry = $entry->toArray();
-
         if ($hideInternals) {
             $cleaned = [];
-            foreach ($entry as $rawKey => $rawValue) {
-                if (! in_array($rawKey, $this->forbidden)) {
-                    if (config('statamic-helpers.with_shop_addon') && Str::contains($rawKey, 'linked_product') && isset($rawValue[0])) {
-                        $cleaned[$rawKey] = $this->getProductResource($rawValue[0]);
-                    } elseif (Str::contains($rawKey, 'linked_page') && isset($rawValue[0])) {
-                        $cleaned[$rawKey] = $this->entry(id: $rawValue[0]);
-                    } else {
-                        $cleaned[$rawKey] = $this->cleaned($rawValue);
-                    }
+            ray($entry->toAugmentedArray());
+            foreach ($entry->toAugmentedArray() as $key => $value) {
+                if (! in_array($key, $this->forbidden)) {
+                    $cleaned[$key] = $this->cleaned($value);
+
+                    //                    if (config('statamic-helpers.with_shop_addon') && Str::contains($key, 'linked_product') && isset($value[0])) {
+                    //                        $cleaned[$key] = $this->getProductResource($value[0]);
+                    //                    } elseif (Str::contains($key, 'linked_page') && isset($value[0])) {
+                    //                        $cleaned[$key] = $this->entry(id: $value[0]);
+                    //
+                    //                    } else {
+                    //                        $cleaned[$key] = $this->cleaned($value);
+                    //                    }
                 }
             }
             $entry = $cleaned;
@@ -210,6 +213,7 @@ class Helper
 
     public function childrenOf($entry)
     {
+        ray($entry);
         $children = [];
         $nav = Statamic::tag('nav:collection:'.$entry['collection']['handle'])
             ->params([
@@ -497,7 +501,6 @@ class Helper
             foreach ($rawValue as $key => $value) {
                 if (! in_array($key, $this->forbidden)) {
                     if (is_array($value)) {
-
                         if (
                             array_is_list($value)
                             && isset($value[0])
@@ -518,6 +521,7 @@ class Helper
                         }
 
                     } else {
+
                         if ($key == 'url' && $isAsset && $path && ! $value) {
                             $disk = $rawValue['container']['disk'] ?? '';
                             $cleanedValue[$key] = Helper::asset($path, $disk);
@@ -529,6 +533,7 @@ class Helper
                 }
             }
         }
+
 
         return $cleanedValue;
     }
@@ -543,9 +548,9 @@ class Helper
             && strlen($value) > 9
             && Str::substrCount($value, '-', 2) == 4
         ) {
+
             $entry = $this->entry(
                 id: $value,
-                withChildren: false,
             );
 
             if ($entry) {
