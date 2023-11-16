@@ -201,9 +201,9 @@ class Helper
             $entry = $cleaned;
         }
 
-        if ($withChildren) {
-            $entry['children'] = $this->childrenOf($entry);
-        }
+//        if ($withChildren) {
+//            $entry['children'] = $this->childrenOf($entry);
+//        }
 
         return $entry;
     }
@@ -306,7 +306,7 @@ class Helper
 
         $raw = GlobalSet::findByHandle($handle)
             ->in($site)
-            ->toArray();
+            ->toAugmentedArray();
 
         $cleaned = [];
 
