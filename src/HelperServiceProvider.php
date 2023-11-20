@@ -33,20 +33,20 @@ class HelperServiceProvider extends ServiceProvider
     public function boot()
     {
 
-        Event::listen(
-            AssetUploaded::class,
-            [HandleAssetUploads::class, 'handle']
-        );
+//        Event::listen(
+//            AssetUploaded::class,
+//            [HandleAssetUploads::class, 'handle']
+//        );
 
-        Event::listen(
-            EntrySaved::class,
-            [RefreshEntryCache::class, 'handle']
-        );
+//        Event::listen(
+//            EntrySaved::class,
+//            [RefreshEntryCache::class, 'handle']
+//        );
 
-        Event::listen(
-            EntryDeleted::class,
-            [RemoveFromEntryCache::class, 'handle']
-        );
+//        Event::listen(
+//            EntryDeleted::class,
+//            [RemoveFromEntryCache::class, 'handle']
+//        );
 
         Event::listen(
             GlobalSetSaved::class,
