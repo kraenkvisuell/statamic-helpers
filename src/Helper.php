@@ -304,19 +304,26 @@ class Helper
     ) {
         $site = $site ?: Site::current()->handle();
 
-        $raw = GlobalSet::findByHandle($handle)
-            ->in($site)
-            ->toAugmentedArray();
+        $set = GlobalSet::findByHandle($handle)
+            ->in($site);
 
-        $cleaned = [];
+        if ($set) {
+            $raw = GlobalSet::findByHandle($handle)
+                ->in($site)
+                ->toAugmentedArray();
 
-        foreach ($raw as $rawKey => $rawValue) {
-            if (! in_array($rawKey, $this->forbidden)) {
-                $cleaned[$rawKey] = $this->cleaned($rawValue);
+            $cleaned = [];
+
+            foreach ($raw as $rawKey => $rawValue) {
+                if (! in_array($rawKey, $this->forbidden)) {
+                    $cleaned[$rawKey] = $this->cleaned($rawValue);
+                }
             }
+
+            return $cleaned;
         }
 
-        return $cleaned;
+        return [];
     }
 
     public function allGlobals($site = '')
