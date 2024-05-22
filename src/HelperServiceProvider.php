@@ -48,15 +48,15 @@ class HelperServiceProvider extends ServiceProvider
 //            [RemoveFromEntryCache::class, 'handle']
 //        );
 
-        Event::listen(
-            GlobalSetSaved::class,
-            [RefreshGlobalCache::class, 'handle']
-        );
-
-        Event::listen(
-            [NavSaved::class, NavTreeSaved::class],
-            [RefreshNavCache::class, 'handle']
-        );
+//        Event::listen(
+//            GlobalSetSaved::class,
+//            [RefreshGlobalCache::class, 'handle']
+//        );
+//
+//        Event::listen(
+//            [NavSaved::class, NavTreeSaved::class],
+//            [RefreshNavCache::class, 'handle']
+//        );
 
         //        Event::listen(
         //            NavTreeSaved::class,
