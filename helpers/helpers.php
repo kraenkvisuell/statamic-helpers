@@ -72,3 +72,12 @@ function statamic_glide(
         $disk
     );
 }
+
+
+function statamic_bardify(
+    $text = []
+) {
+    return Helper::bardify(
+        $text
+    );
+}

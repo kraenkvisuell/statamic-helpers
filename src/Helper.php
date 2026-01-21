@@ -13,7 +13,18 @@ use Statamic\Facades\Site;
 use Statamic\Facades\Structure;
 use Statamic\Facades\Taxonomy;
 use Statamic\Facades\Term;
+use Statamic\Fieldtypes\Bard\Marks\Small;
 use Statamic\Statamic;
+use Tiptap\Extensions\StarterKit;
+use Tiptap\Extensions\TextAlign;
+use Tiptap\Marks\Highlight;
+use Tiptap\Marks\Link;
+use Tiptap\Marks\Subscript;
+use Tiptap\Marks\Superscript;
+use Tiptap\Marks\Underline;
+use Tiptap\Nodes\Table;
+use Tiptap\Nodes\TableCell;
+use Tiptap\Nodes\TableRow;
 
 class Helper
 {
@@ -84,7 +95,6 @@ class Helper
                 if (! in_array($rawKey, $this->forbidden)) {
                     if ($taxonomy = Taxonomy::findByHandle($rawKey)) {
                         $cleaned[$rawKey] = $this->hydratedTaxonomies($rawKey, $rawValue);
-
                     } else {
                         $cleaned[$rawKey] = $this->cleaned($rawValue);
                     }
@@ -94,7 +104,7 @@ class Helper
             $cleanedEntries[] = $cleaned;
         }
 
-        $nav = Statamic::tag('nav:collection:'.$collection)->fetch();
+        $nav = Statamic::tag('nav:collection:' . $collection)->fetch();
 
         if ($nav) {
             $sortedEntries = [];
@@ -112,7 +122,7 @@ class Helper
 
     public function cachedEntry($collection = 'pages', $slug = 'home')
     {
-        $key = $collection.'.'.$slug.'.'.app()->getLocale();
+        $key = $collection . '.' . $slug . '.' . app()->getLocale();
 
         //Cache::forget($key);
         return Cache::rememberForever($key, function () use ($collection, $slug) {
@@ -201,9 +211,9 @@ class Helper
             $entry = $cleaned;
         }
 
-//        if ($withChildren) {
-//            $entry['children'] = $this->childrenOf($entry);
-//        }
+        //        if ($withChildren) {
+        //            $entry['children'] = $this->childrenOf($entry);
+        //        }
 
         return $entry;
     }
@@ -211,7 +221,7 @@ class Helper
     public function childrenOf($entry)
     {
         $children = [];
-        $nav = Statamic::tag('nav:collection:'.$entry['collection']['handle'])
+        $nav = Statamic::tag('nav:collection:' . $entry['collection']['handle'])
             ->params([
                 'from' => $entry['url'],
             ])
@@ -247,7 +257,7 @@ class Helper
             $params['max_depth'] = $maxDepth;
         }
 
-        $nav = Statamic::tag('nav:'.$slug)
+        $nav = Statamic::tag('nav:' . $slug)
             ->params($params)
             ->fetch();
 
@@ -263,7 +273,7 @@ class Helper
             $handle = $navTag->handle;
 
             if (stristr(get_class($navTag), 'CollectionStructure')) {
-                $navs['collection'][$handle] = $this->nav(slug: 'collection:'.$handle, select: $select);
+                $navs['collection'][$handle] = $this->nav(slug: 'collection:' . $handle, select: $select);
             } else {
                 $navs[$handle] = $this->nav(slug: $handle, select: $select);
             }
@@ -274,7 +284,7 @@ class Helper
 
     public function cachedAllNavs($language = 'default')
     {
-        return Cache::rememberForever('all_navs.'.$language, function () {
+        return Cache::rememberForever('all_navs.' . $language, function () {
             return $this->allNavs();
         });
     }
@@ -345,7 +355,7 @@ class Helper
         $site = $site ?: Site::current()->handle();
 
         //Cache::forget('all_globals.'.$language.'.'.$site);
-        return Cache::rememberForever('all_globals.'.$language.'.'.$site, function () use ($site) {
+        return Cache::rememberForever('all_globals.' . $language . '.' . $site, function () use ($site) {
             return $this->allGlobals(site: $site);
         });
     }
@@ -357,7 +367,7 @@ class Helper
         $forms = [];
 
         foreach ($all as $form) {
-            $fetched = Statamic::tag('form:'.$form->handle())->fetch();
+            $fetched = Statamic::tag('form:' . $form->handle())->fetch();
 
             $forms[$form->handle()] = [
                 'fields' => $form->fields,
@@ -373,7 +383,7 @@ class Helper
         $slugs = []
     ) {
         sort($slugs);
-        $cacheKey = $handle.'_'.implode('_', $slugs);
+        $cacheKey = $handle . '_' . implode('_', $slugs);
 
         if (isset($this->cachedTaxonomies[$cacheKey])) {
             return $this->cachedTaxonomies[$cacheKey];
@@ -386,7 +396,7 @@ class Helper
                 return in_array($term->slug(), $slugs);
             })
             ->map(function ($term, $handle) {
-                $cacheKey = $handle.'_'.$term->slug();
+                $cacheKey = $handle . '_' . $term->slug();
                 if (! isset($this->cachedTerms[$cacheKey])) {
                     $term = $term->toArray();
 
@@ -421,7 +431,7 @@ class Helper
     {
         if (count($list) === 1 && is_string($list[0])) {
             try {
-                if ($form = Statamic::tag('form:'.$list[0])->fetch()) {
+                if ($form = Statamic::tag('form:' . $list[0])->fetch()) {
                     return $form;
                 }
             } catch (Exception $e) {
@@ -438,14 +448,14 @@ class Helper
 
         $presetDisk = config('statamic-helpers.preset_disk') ?: 'presets';
 
-        $cdn = config('filesystems.disks.'.$presetDisk.'.cdn');
-        $root = config('filesystems.disks.'.$presetDisk.'.root');
+        $cdn = config('filesystems.disks.' . $presetDisk . '.cdn');
+        $root = config('filesystems.disks.' . $presetDisk . '.root');
 
         foreach (config('statamic-helpers.presets') ?: [] as $presetKey => $preset) {
             if ($rawValue['mime_type'] != 'image/jpeg' && $rawValue['mime_type'] != 'image/png') {
                 $presets[$presetKey] = $originalUrl;
             } elseif ($cdn) {
-                $presets[$presetKey] = $cdn.'/'.($root ? $root.'/' : '').$presetKey.'/'.$rawValue['path'];
+                $presets[$presetKey] = $cdn . '/' . ($root ? $root . '/' : '') . $presetKey . '/' . $rawValue['path'];
             } else {
                 $presets[$presetKey] = Storage::disk($presetDisk)->url($rawValue['path']);
             }
@@ -465,11 +475,11 @@ class Helper
         }
         $disk = $disk ?: 'assets';
 
-        $cdn = config('filesystems.disks.'.$disk.'.cdn');
-        $root = config('filesystems.disks.'.$disk.'.root');
+        $cdn = config('filesystems.disks.' . $disk . '.cdn');
+        $root = config('filesystems.disks.' . $disk . '.root');
 
         if ($useCdn && $cdn) {
-            return $cdn.'/'.($root ? $root.'/' : '').$path;
+            return $cdn . '/' . ($root ? $root . '/' : '') . $path;
         }
 
         return Storage::disk($disk)->url($path);
@@ -517,13 +527,11 @@ class Helper
                             } elseif (Str::contains($key, 'linked_page') && isset($value[0])) {
                                 $cleanedValue[$key] = $this->entry(id: $value[0]);
                             }
-
                         } elseif (config('statamic-helpers.with_shop_addon') && Str::contains($key, 'linked_product') && isset($value[0])) {
                             $cleanedValue[$key] = $this->getProductResource($value[0]);
                         } else {
                             $cleanedValue[$key] = $this->cleaned($value);
                         }
-
                     } else {
                         if ($key == 'url' && $isAsset && $path && ! $value) {
                             $disk = $rawValue['container']['disk'] ?? '';
@@ -568,5 +576,54 @@ class Helper
         $product = \App\Models\Product::with('skus.colors')->findOrNew($value);
 
         return new \App\Http\Resources\ProductResource($product);
+    }
+
+    public function editor()
+    {
+        return app()->makeWith(\Tiptap\Editor::class, [
+            'configuration' => [
+                'extensions' => [
+                    new StarterKit(),
+                    new Link([
+                        'HTMLAttributes' => [
+                            'target' => '',
+                            'rel' => '',
+                        ]
+                    ]),
+                    new Underline(),
+                    new Subscript(),
+                    new Superscript(),
+                    new Highlight(),
+                    new Table(),
+                    new TableRow(),
+                    new TableCell(),
+                    new Small(),
+                    new TextAlign(['types' => ['heading', 'paragraph']]),
+                ],
+            ],
+        ]);
+    }
+
+    public function bardify($text)
+    {
+        if (!$text) {
+            return '';
+        }
+
+        if (is_string($text) && Str::startsWith(trim($text), '<')) {
+            return $text;
+        }
+
+        if (!is_string($text) && !is_array($text) && @$text->raw()) {
+            if (is_string(@$text->raw())) {
+                $text = json_decode($text->raw());
+            } else {
+                $text = $text->raw();
+            }
+        } elseif (is_string($text)) {
+            $text = json_decode($text);
+        }
+
+        return $this->editor()->setContent(['content' => $text])->getHTML();
     }
 }
