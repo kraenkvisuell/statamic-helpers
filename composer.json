@@ -17,9 +17,9 @@
         }
     },
     "require-dev": {
-        "laravel/pint": "^1.1",
-        "orchestra/testbench": "^8.0",
-        "statamic/cms": "^4.2"
+        "laravel/pint": "^1.27",
+        "orchestra/testbench": "^10.9",
+        "statamic/cms": "^6.0"
     },
     "config": {
         "allow-plugins": {
